@@ -14,6 +14,39 @@ body {
     margin: 0;
     padding: 10px;
 }
+
+/* Print-specific styles */
+@media print {
+    body {
+        margin: 0;
+        padding: 0;
+        background: white;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+    
+    .invoice {
+        border: 2px solid #000;
+        margin: 0;
+        padding: 8px;
+        width: 100%;
+        box-sizing: border-box;
+        page-break-inside: avoid;
+    }
+    
+    /* Ensure only the invoice prints */
+    body > *:not(.invoice):not(script) {
+        display: none !important;
+    }
+    
+    /* Override any margins/padding that might interfere */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+}
 .invoice {
     width: 100%;
     border: 2px solid #000;
@@ -178,7 +211,11 @@ h2 {
     </table>
 </div>
 
-<p class="center"><button onclick="window.print()">🖨 In hóa đơn</button></p>
+<p class="center no-print">
+    <button onclick="printInvoice()" style="padding: 10px 20px; font-size: 14px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        🖨 In hóa đơn A5
+    </button>
+</p>
 
 <script>
 // Error handling utilities
@@ -437,13 +474,45 @@ function initializeInvoice() {
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', initializeInvoice);
 
-// Handle print errors
+// Enhanced print function for A5 invoice only
+function printInvoice() {
+    try {
+        // Validate that essential data exists before printing
+        const maVanDon = document.getElementById('maVanDon').textContent.trim();
+        if (!maVanDon) {
+            showUserError('Không thể in: Thiếu mã vận đơn');
+            return;
+        }
+
+        console.log('Preparing to print A5 invoice...');
+        
+        // Set document title for print job
+        const originalTitle = document.title;
+        document.title = `Hóa đơn ECO - ${maVanDon}`;
+        
+        // Trigger print
+        window.print();
+        
+        // Restore original title
+        document.title = originalTitle;
+        
+    } catch (error) {
+        logError('Print function failed', error);
+        showUserError('Có lỗi xảy ra khi in hóa đơn. Vui lòng thử lại.');
+    }
+}
+
+// Handle print events with better logging
 window.addEventListener('beforeprint', function() {
-    console.log('Preparing to print invoice...');
+    console.log('Starting A5 invoice print...');
+    // Hide any elements that shouldn't print
+    document.body.classList.add('printing');
 });
 
 window.addEventListener('afterprint', function() {
-    console.log('Print dialog closed');
+    console.log('A5 invoice print completed');
+    // Restore normal view
+    document.body.classList.remove('printing');
 });
 
 // Handle page errors
