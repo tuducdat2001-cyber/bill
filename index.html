@@ -183,12 +183,21 @@
         .side-content .item .label {
             font-weight: bold;
         }
-        /* Fix lỗi hiển thị số tiền bôi đậm không đúng vị trí */
         .side-content .item .value {
             text-align: right;
             border-bottom: 1px dashed #000;
             min-width: 50px;
         }
+        
+        /* CSS mới để tăng kích thước số tiền */
+        .side-content .value-money {
+            font-size: 0.9rem; /* Tăng kích thước phông chữ */
+            font-weight: normal; /* Bỏ in đậm */
+            text-align: right;
+            border-bottom: 1px dashed #000;
+            min-width: 50px;
+        }
+
         .side-content .total-cost {
             display: flex;
             justify-content: space-between;
@@ -200,9 +209,10 @@
         .side-content .total-cost .label {
             font-weight: bold;
         }
-        .side-content .total-cost .value {
-            font-size: 0.9rem;
-            font-weight: bold;
+        /* CSS mới để tăng kích thước và bỏ in đậm cho tổng phải thu */
+        .side-content .total-cost .value-money {
+            font-size: 1.1rem; /* Tăng kích thước lớn hơn nữa */
+            font-weight: normal; /* Bỏ in đậm */
             color: #e74c3c;
         }
 
@@ -526,22 +536,21 @@
         document.getElementById("ghiChu").textContent = getParam("ghiChu");
         document.getElementById("noiDungHangHoa").textContent = getParam("noiDungHangHoa");
 
-        // Cập nhật thông tin cước phí bằng innerHTML để hiển thị đúng thẻ <b>
-        document.getElementById("cuocChinh").innerHTML = formatCurrency(getParam("cuocChinh"));
-        document.getElementById("dichVuThem").innerHTML = formatCurrency(getParam("dichVuThem"));
-        document.getElementById("tongCuoc").innerHTML = formatCurrency(getParam("tongCuoc"));
-        document.getElementById("thuHo").innerHTML = formatCurrency(getParam("thuHo"));
-        document.getElementById("tongPhaiThu").innerHTML = formatCurrency(getParam("tongPhaiThu"));
+        // Cập nhật thông tin cước phí và định dạng lại
+        document.getElementById("cuocChinh").textContent = formatCurrency(getParam("cuocChinh"));
+        document.getElementById("dichVuThem").textContent = formatCurrency(getParam("dichVuThem"));
+        document.getElementById("tongCuoc").textContent = formatCurrency(getParam("tongCuoc"));
+        document.getElementById("thuHo").textContent = formatCurrency(getParam("thuHo"));
+        document.getElementById("tongPhaiThu").textContent = formatCurrency(getParam("tongPhaiThu"));
     });
 
-    // Hàm định dạng tiền tệ (thêm dấu phẩy và làm đậm)
+    // Hàm định dạng tiền tệ (thêm dấu phẩy)
     function formatCurrency(amount) {
         // Xóa tất cả các ký tự không phải số
         const cleanedAmount = String(amount).replace(/\D/g, '');
-        if (!cleanedAmount) return '<b>0</b>';
+        if (!cleanedAmount) return '0';
         // Sử dụng toLocaleString() với 'vi-VN' để tự động phân tách hàng nghìn, triệu
-        const formattedAmount = parseInt(cleanedAmount).toLocaleString('vi-VN');
-        return `<b>${formattedAmount}</b>`;
+        return parseInt(cleanedAmount).toLocaleString('vi-VN');
     }
 </script>
 
