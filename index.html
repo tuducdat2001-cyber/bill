@@ -47,17 +47,16 @@
             flex: 1;
         }
         
-        /* CSS cho QR code trong header */
-        .header-left .qr-code {
+        /* CSS cho logo và QR code trong header */
+        .header-left .logo, .header-left .qr-code {
             width: 40px;
             height: 40px;
             margin-right: 5px;
         }
-
+        
+        /* Loại bỏ CSS của SVG cũ */
         .header-left svg {
-            width: 40px;
-            height: 40px;
-            margin-right: 5px;
+            display: none;
         }
 
         .company-info h1 {
@@ -128,7 +127,7 @@
         /* Phần hàng hóa và cước phí */
         .content-section {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 1fr 1fr; /* Chia đều hai cột */
             border-bottom: 1px solid #000;
             flex-grow: 1;
         }
@@ -139,6 +138,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.7rem;
+            table-layout: fixed; /* Đảm bảo các cột có chiều rộng bằng nhau */
         }
         /* Căn giữa tiêu đề bảng và các giá trị trong bảng */
         .content-table th, .content-table td {
@@ -158,6 +158,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.7rem;
+            table-layout: fixed; /* Chia đều hai cột */
         }
         /* Căn giữa tiêu đề bảng và các giá trị trong bảng */
         .notes-table th, .notes-table td {
@@ -324,13 +325,10 @@
     <!-- Header: Logo, tên công ty và mã vạch -->
     <div class="header">
         <div class="header-left">
-            <!-- QR code -->
-            <img class="qr-code" src="https://placehold.co/50x50?text=QR+Code" alt="QR Code">
-            <!-- SVG logo -->
-            <svg width="40" height="40" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="25" cy="25" r="20" fill="#e0f0ff" stroke="#0066cc" stroke-width="2"/>
-                <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#0066cc" font-weight="bold">ECO</text>
-            </svg>
+            <!-- Mã QR mới được thêm vào -->
+            <img class="qr-code" src="https://tuducdat2001-cyber.github.io/bill/z6886848621829_aea68d7f33a412bd56c8271a3a15fe26.jpg" alt="Mã QR">
+            <!-- Logo cũ được giữ lại -->
+            <img class="logo" src="https://tuducdat2001-cyber.github.io/bill/z6887164537636_0c445e9b4d6e1687482f51f307b359e5.jpg" alt="Logo Công ty">
             <div class="company-info">
                 <h1>VẬN TẢI ECO</h1>
                 <h2>VẬN CHUYỂN HÀNG HOÁ BẮC - NAM</h2>
@@ -399,16 +397,19 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Số kiện</th>
-                            <th>Trọng lượng thực</th>
+                            <!-- Đã đổi vị trí Dịch vụ và Số kiện -->
                             <th>Dịch vụ</th>
+                            <!-- Đã xóa chữ 'thực' -->
+                            <th>Trọng lượng</th>
+                            <th>Số kiện</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td id="soKien"></td>
-                            <td id="tlThuc"></td>
+                            <!-- Đã đổi vị trí td tương ứng -->
                             <td id="dichVuTrongBang"></td>
+                            <td id="tlThuc"></td>
+                            <td id="soKien"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -417,14 +418,16 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Ghi chú</th>
+                             <!-- Đã đổi vị trí Ghi chú và Nội dung hàng hóa -->
                             <th>Nội dung hàng hoá</th>
+                            <th>Ghi chú</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td id="ghiChu"></td>
+                             <!-- Đã đổi vị trí td tương ứng -->
                             <td id="noiDungHangHoa"></td>
+                            <td id="ghiChu"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -452,7 +455,7 @@
                 <span class="value" id="thuHo"></span>
             </div>
             <div class="total-cost">
-                <span class="label">Tổng phải thu:</span>
+                <span class="label">Tổng phải thu:</span> <!-- Đã xóa "khi phát thư" -->
                 <span class="value" id="tongPhaiThu"></span>
             </div>
         </div>
@@ -534,6 +537,7 @@
     // Hàm định dạng tiền tệ (thêm dấu phẩy và làm đậm)
     function formatCurrency(amount) {
         if (!amount) return '0';
+        // Sử dụng toLocaleString() với 'vi-VN' để tự động phân tách hàng nghìn, triệu
         const formattedAmount = parseInt(amount).toLocaleString('vi-VN');
         return `<b>${formattedAmount}</b>`;
     }
