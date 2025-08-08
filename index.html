@@ -9,103 +9,99 @@
     margin: 5mm;
 }
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
     font-size: 12px;
-    margin: 0;
+    background-color: #f5f5f5;
     padding: 10px;
-}
-
-/* Print-specific styles */
-@media print {
-    body {
-        margin: 0;
-        padding: 0;
-        background: white;
-    }
-    
-    .no-print {
-        display: none !important;
-    }
-    
-    .invoice {
-        border: 2px solid #000;
-        margin: 0;
-        padding: 8px;
-        width: 100%;
-        box-sizing: border-box;
-        page-break-inside: avoid;
-    }
-    
-    /* Ensure only the invoice prints */
-    body > *:not(.invoice):not(script) {
-        display: none !important;
-    }
-    
-    /* Override any margins/padding that might interfere */
-    * {
-        -webkit-print-color-adjust: exact !important;
-        color-adjust: exact !important;
-    }
 }
 .invoice {
     width: 100%;
-    border: 2px solid #000;
-    padding: 8px;
+    border: 1px solid #ddd;
+    padding: 10px;
     box-sizing: border-box;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 5px;
 }
 table {
     border-collapse: collapse;
     width: 100%;
-    margin-bottom: 2px;
+    margin-bottom: 5px;
 }
 td, th {
-    border: 1px solid #000;
-    padding: 4px;
+    border: 1px solid #ddd;
+    padding: 5px;
     vertical-align: top;
-    font-size: 11px;
 }
 .no-border td {
     border: none;
-    padding: 2px;
 }
 .bold { font-weight: bold; }
 .center { text-align: center; }
 .right { text-align: right; }
+.left { text-align: left; }
 .qr {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     background-size: cover;
     background-position: center;
-    border: 1px solid #ccc;
-    display: inline-block;
+    margin: 0 auto;
+}
+.header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 8px;
+    border-radius: 3px;
+    margin-bottom: 10px;
 }
 h1 {
     margin: 0;
-    font-size: 18px;
+    font-size: 20px;
+    color: #e74c3c;
 }
 h2 {
     margin: 0;
-    font-size: 14px;
-}
-.error {
-    color: red;
-    font-weight: bold;
-}
-.warning {
-    color: orange;
-    font-style: italic;
-}
-.header-code {
     font-size: 16px;
-    font-weight: bold;
-    text-align: center;
 }
-.company-name {
+.highlight {
+    background-color: #f8f9fa;
+}
+.total-row {
+    background-color: #e74c3c;
+    color: white;
+    font-weight: bold;
+}
+.print-btn {
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
     font-size: 14px;
-    font-weight: bold;
 }
-.hotline {
-    font-size: 11px;
+.print-btn:hover {
+    background-color: #1a252f;
+}
+.company-info {
+    line-height: 1.4;
+}
+.bill-code {
+    font-size: 18px;
+    color: #e74c3c;
+    letter-spacing: 1px;
+}
+.section-title {
+    background-color: #ecf0f1;
+    font-weight: bold;
+    padding: 5px;
+}
+.signature-area {
+    height: 50px;
+    border-top: 1px dashed #ccc;
+    margin-top: 30px;
+    padding-top: 5px;
 }
 </style>
 </head>
@@ -113,53 +109,48 @@ h2 {
 
 <div class="invoice">
     <!-- Header -->
-    <table class="no-border">
-        <tr>
-            <td style="width: 65%;">
-                <div class="company-name">VẬN TẢI ECO</div>
-                <div style="font-size: 11px;">VẬN CHUYỂN HÀNG HÓA BẮC - NAM</div>
-                <div class="hotline">Hotline: <span class="bold">0946 936 999 - 0888 805 625</span></div>
-            </td>
-            <td class="right">
-                <div class="header-code">*<span id="maVanDon"></span>*</div>
-                <div style="font-size: 10px; margin-top: 5px;" id="maVanDonDisplay"></div>
-            </td>
-        </tr>
-    </table>
+    <div class="header">
+        <table class="no-border">
+            <tr>
+                <td style="width: 70%;" class="company-info">
+                    <h1>VẬN TẢI ECO</h1>
+                    <div>VẬN CHUYỂN HÀNG HÓA BẮC - NAM</div>
+                    <div>Hotline: <span class="bold">0946 936 999 - 0888 805 625</span></div>
+                    <div>Email: info@vantaieco.com - Website: www.vantaieco.com</div>
+                </td>
+                <td class="right">
+                    <div class="bill-code">*<span id="maVanDon"></span>*</div>
+                    <div style="margin-top: 10px;">HÓA ĐƠN VẬN CHUYỂN</div>
+                </td>
+            </tr>
+        </table>
+    </div>
 
-    <!-- Mã KH -->
+    <!-- Thông tin khách hàng -->
+    <div class="section-title">THÔNG TIN KHÁCH HÀNG</div>
     <table>
         <tr>
-            <td style="width: 25%;">Mã KH gửi: <span id="maKHGui"></span></td>
-            <td style="width: 25%;">Mã BC gửi: <span id="maBCGui"></span></td>
-            <td style="width: 25%;">Mã KH nhận: <span id="maKHNhan"></span></td>
-            <td style="width: 25%;">Mã BC nhận: <span id="maBCNhan"></span></td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                Tên khách gửi: <span id="tenNguoiGui"></span><br>
-                Địa chỉ: <span id="diaChiNguoiGui"></span>
+            <td style="width: 50%;" class="highlight">
+                <div class="bold">NGƯỜI GỬI</div>
+                <div>Mã KH: <span id="maKHGui"></span> | Mã BC: <span id="maBCGui"></span></div>
+                <div>Tên: <span id="tenNguoiGui"></span></div>
+                <div>Địa chỉ: <span id="diaChiNguoiGui"></span></div>
+                <div><span id="quanHuyenGui"></span>, <span id="tpGui"></span></div>
+                <div>Điện thoại: <span id="soDTGui"></span> | Liên hệ: <span id="tenLHGui"></span></div>
             </td>
-            <td colspan="2">
-                Tên khách nhận: <span id="tenNguoiNhan"></span><br>
-                Địa chỉ: <span id="diaChiNguoiNhan"></span>
+            <td style="width: 50%;" class="highlight">
+                <div class="bold">NGƯỜI NHẬN</div>
+                <div>Mã KH: <span id="maKHNhan"></span> | Mã BC: <span id="maBCNhan"></span></div>
+                <div>Tên: <span id="tenNguoiNhan"></span></div>
+                <div>Địa chỉ: <span id="diaChiNguoiNhan"></span></div>
+                <div><span id="quanHuyenNhan"></span>, <span id="tpNhan"></span></div>
+                <div>Điện thoại: <span id="soDTNhan"></span> | Liên hệ: <span id="tenLHNhan"></span></div>
             </td>
-        </tr>
-        <tr>
-            <td>Quận/ Huyện: <span id="quanHuyenGui"></span></td>
-            <td>Tỉnh/ TP: <span id="tpGui"></span></td>
-            <td>Quận/ Huyện: <span id="quanHuyenNhan"></span></td>
-            <td>Tỉnh/ TP: <span id="tpNhan"></span></td>
-        </tr>
-        <tr>
-            <td>Số điện thoại: <span id="soDTGui"></span></td>
-            <td>Tên liên hệ: <span id="tenLHGui"></span></td>
-            <td>Số điện thoại: <span id="soDTNhan"></span></td>
-            <td>Tên liên hệ: <span id="tenLHNhan"></span></td>
         </tr>
     </table>
 
-    <!-- Hàng hóa -->
+    <!-- Thông tin hàng hóa -->
+    <div class="section-title">THÔNG TIN HÀNG HÓA</div>
     <table>
         <tr>
             <td colspan="2">Mô tả hàng hoá: <span id="moTaHang"></span></td>
@@ -169,11 +160,12 @@ h2 {
         <tr>
             <td>Dịch vụ cộng thêm: <span id="dichVuThem"></span></td>
             <td>Tổng cước: <span id="tongThu"></span></td>
-            <td colspan="2" class="bold">Tổng phải thu khi phát: <span id="tongThu2"></span></td>
+            <td colspan="2" class="total-row">TỔNG PHẢI THU KHI PHÁT: <span id="tongThu2"></span></td>
         </tr>
     </table>
 
-    <!-- Thông tin kiện -->
+    <!-- Thông tin kiện hàng -->
+    <div class="section-title">THÔNG TIN KIỆN HÀNG</div>
     <table>
         <tr>
             <td>Số kiện: <span id="soKien"></span></td>
@@ -183,348 +175,102 @@ h2 {
         </tr>
         <tr>
             <td>Khai giá: <span id="khaiGia"></span></td>
-            <td colspan="3">Ghi chú: <span id="ghiChu"></span></td>
+            <td colspan="3">Ghi chú: </td>
         </tr>
     </table>
 
-    <!-- Dịch vụ & QR -->
+    <!-- Thông tin dịch vụ -->
+    <div class="section-title">THÔNG TIN DỊCH VỤ</div>
     <table>
         <tr>
             <td>Dịch vụ: <span id="dichVu"></span></td>
             <td>D.vụ gtgt: <span id="dichVuNhanh"></span></td>
-            <td rowspan="3" class="center" style="width: 80px;">
-                <div class="qr" id="qrCode"></div><br>
-                <div style="font-size: 9px; margin-top: 2px;">Quét QR xem chính sách</div>
+            <td rowspan="3" class="center">
+                <div class="qr" id="qrCode"></div>
+                <div>Quét mã QR để theo dõi đơn hàng</div>
             </td>
-            <td>Mã nhân viên nhận</td>
-            <td>Mã nhân viên phát</td>
+            <td>Mã NV nhận: </td>
+            <td>Mã NV phát: </td>
         </tr>
         <tr>
             <td>Ngày giờ gửi: <span id="ngayGui"></span></td>
             <td>Ngày giờ nhận: <span id="ngayNhan"></span></td>
-            <td>Chuyển hoàn □ Hủy □</td>
+            <td colspan="2">Tình trạng: □ Chuyển hoàn □ Hủy</td>
         </tr>
         <tr>
-            <td colspan="2" class="center">Họ tên & chữ ký người gửi</td>
-            <td colspan="2" class="center">Họ tên & chữ ký người nhận</td>
+            <td colspan="2" class="center signature-area">
+                <div>Họ tên & chữ ký người gửi</div>
+            </td>
+            <td colspan="2" class="center signature-area">
+                <div>Họ tên & chữ ký người nhận</div>
+            </td>
         </tr>
     </table>
+
+    <!-- Footer -->
+    <div style="margin-top: 10px; font-size: 11px; text-align: center;">
+        <div>Cảm ơn Quý khách đã sử dụng dịch vụ của chúng tôi!</div>
+        <div>Mọi thắc mắc xin liên hệ hotline: 0946 936 999</div>
+    </div>
 </div>
 
-<p class="center no-print">
-    <button onclick="printInvoice()" style="padding: 10px 20px; font-size: 14px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-        🖨 In hóa đơn A5
-    </button>
-</p>
+<p class="center"><button class="print-btn" onclick="window.print()">🖨 IN HÓA ĐƠN</button></p>
 
 <script>
-// Error handling utilities
-function logError(message, context) {
-    console.error(`ECO Invoice Error: ${message}`, context);
-}
-
-function showUserError(message) {
-    // Could be enhanced with toast notifications or modal dialogs
-    alert(`Lỗi: ${message}`);
-}
-
-// Safe parameter extraction with validation
 function getParam(name) {
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const value = urlParams.get(name);
-        return value ? value.trim() : '';
-    } catch (error) {
-        logError(`Failed to get parameter: ${name}`, error);
-        return '';
-    }
+    return new URLSearchParams(window.location.search).get(name) || '';
+}
+function formatCurrency(value) {
+    if (!value) return '0 đ';
+    return Number(value).toLocaleString('vi-VN') + ' đ';
+}
+function set(id, val) {
+    const element = document.getElementById(id);
+    if (element) element.innerText = val;
+}
+function setCurrency(id, val) {
+    const element = document.getElementById(id);
+    if (element) element.innerText = formatCurrency(val);
 }
 
-// Validation functions
-function validateRequired(value, fieldName) {
-    if (!value || value.trim() === '') {
-        return {
-            isValid: false,
-            message: `${fieldName} là bắt buộc`
-        };
-    }
-    return { isValid: true };
-}
+// Set values from URL parameters
+set("maVanDon", getParam("maVanDon"));
+set("maKHGui", getParam("maKHGui"));
+set("maBCGui", getParam("maBCGui"));
+set("maKHNhan", getParam("maKHNhan"));
+set("maBCNhan", getParam("maBCNhan"));
+set("tenNguoiGui", getParam("tenNguoiGui"));
+set("diaChiNguoiGui", getParam("diaChiNguoiGui"));
+set("tenNguoiNhan", getParam("tenNguoiNhan"));
+set("diaChiNguoiNhan", getParam("diaChiNguoiNhan"));
+set("quanHuyenGui", getParam("quanHuyenGui"));
+set("tpGui", getParam("tpGui"));
+set("quanHuyenNhan", getParam("quanHuyenNhan"));
+set("tpNhan", getParam("tpNhan"));
+set("soDTGui", getParam("soDTGui"));
+set("tenLHGui", getParam("tenLHGui"));
+set("soDTNhan", getParam("soDTNhan"));
+set("tenLHNhan", getParam("tenLHNhan"));
+set("moTaHang", getParam("moTaHang"));
+set("thanhToan", getParam("thanhToan"));
+setCurrency("cuocChinh", getParam("cuocChinh"));
+set("dichVuThem", getParam("dichVuThem"));
+setCurrency("tongThu", getParam("tongThu"));
+setCurrency("tongThu2", getParam("tongThu"));
+set("soKien", getParam("soKien"));
+set("tlThuc", getParam("tlThuc") + ' kg');
+set("tlQDoi", getParam("tlQDoi") + ' kg');
+setCurrency("thuHo", getParam("thuHo"));
+setCurrency("khaiGia", getParam("khaiGia"));
+set("dichVu", getParam("dichVu"));
+set("dichVuNhanh", getParam("dichVuNhanh"));
+set("ngayGui", getParam("ngayGui") || new Date().toLocaleString());
+set("ngayNhan", getParam("ngayNhan"));
 
-function validatePhone(phone) {
-    if (!phone) return { isValid: true }; // Optional field
-    
-    const phoneRegex = /^[0-9\s\-\+\(\)]{10,15}$/;
-    if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
-        return {
-            isValid: false,
-            message: 'Số điện thoại không hợp lệ'
-        };
-    }
-    return { isValid: true };
-}
-
-function validateNumeric(value, fieldName) {
-    if (!value) return { isValid: true }; // Optional field
-    
-    if (isNaN(value) || value < 0) {
-        return {
-            isValid: false,
-            message: `${fieldName} phải là số hợp lệ`
-        };
-    }
-    return { isValid: true };
-}
-
-function validateDate(dateStr) {
-    if (!dateStr) return { isValid: true }; // Optional field
-    
-    // Accept various Vietnamese date formats
-    const dateFormats = [
-        /^\d{1,2}\/\d{1,2}\/\d{4}$/,
-        /^\d{1,2}-\d{1,2}-\d{4}$/,
-        /^\d{4}-\d{1,2}-\d{1,2}$/
-    ];
-    
-    const isValidFormat = dateFormats.some(format => format.test(dateStr));
-    if (!isValidFormat) {
-        return {
-            isValid: false,
-            message: 'Định dạng ngày không hợp lệ (dd/mm/yyyy)'
-        };
-    }
-    return { isValid: true };
-}
-
-// Safe element setting with error handling
-function safeSet(elementId, value, options = {}) {
-    try {
-        const element = document.getElementById(elementId);
-        if (!element) {
-            logError(`Element not found: ${elementId}`);
-            return false;
-        }
-
-        // Handle different types of content
-        const displayValue = value || (options.defaultValue || '');
-        
-        if (options.isHTML) {
-            element.innerHTML = displayValue;
-        } else {
-            element.textContent = displayValue;
-        }
-
-        // Apply styling based on validation
-        if (options.isError) {
-            element.className = (element.className || '') + ' error';
-            element.title = options.errorMessage || 'Dữ liệu không hợp lệ';
-        } else if (options.isWarning) {
-            element.className = (element.className || '') + ' warning';
-            element.title = options.warningMessage || 'Cần kiểm tra dữ liệu';
-        }
-
-        return true;
-    } catch (error) {
-        logError(`Failed to set element ${elementId}`, { error, value });
-        return false;
-    }
-}
-
-// Enhanced set function with validation
-function setWithValidation(elementId, value, validator, fieldName) {
-    const validation = validator ? validator(value, fieldName) : { isValid: true };
-    
-    safeSet(elementId, value, {
-        isError: !validation.isValid,
-        errorMessage: validation.message,
-        defaultValue: validation.isValid ? '' : `[${validation.message}]`
-    });
-    
-    if (!validation.isValid) {
-        logError(`Validation failed for ${fieldName}`, validation.message);
-    }
-}
-
-// QR Code generation with error handling
-function generateQRCode(data) {
-    if (!data) {
-        logError('No data provided for QR code generation');
-        return;
-    }
-
-    try {
-        const qrElement = document.getElementById("qrCode");
-        if (!qrElement) {
-            logError('QR code element not found');
-            return;
-        }
-
-        const encodedData = encodeURIComponent(data);
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=${encodedData}`;
-        
-        qrElement.style.backgroundImage = `url('${qrUrl}')`;
-        
-        // Add error handling for failed image load
-        const img = new Image();
-        img.onload = function() {
-            // QR code loaded successfully
-        };
-        img.onerror = function() {
-            logError('Failed to load QR code image');
-            qrElement.style.backgroundColor = '#f0f0f0';
-            qrElement.textContent = 'QR Error';
-        };
-        img.src = qrUrl;
-        
-    } catch (error) {
-        logError('QR code generation failed', error);
-    }
-}
-
-// Main initialization function
-function initializeInvoice() {
-    try {
-        // Collect all form data
-        const formData = {
-            maVanDon: getParam("maVanDon"),
-            maKHGui: getParam("maKHGui"),
-            maBCGui: getParam("maBCGui"),
-            maKHNhan: getParam("maKHNhan"),
-            maBCNhan: getParam("maBCNhan"),
-            tenNguoiGui: getParam("tenNguoiGui"),
-            diaChiNguoiGui: getParam("diaChiNguoiGui"),
-            tenNguoiNhan: getParam("tenNguoiNhan"),
-            diaChiNguoiNhan: getParam("diaChiNguoiNhan"),
-            quanHuyenGui: getParam("quanHuyenGui"),
-            tpGui: getParam("tpGui"),
-            quanHuyenNhan: getParam("quanHuyenNhan"),
-            tpNhan: getParam("tpNhan"),
-            soDTGui: getParam("soDTGui"),
-            tenLHGui: getParam("tenLHGui"),
-            soDTNhan: getParam("soDTNhan"),
-            tenLHNhan: getParam("tenLHNhan"),
-            moTaHang: getParam("moTaHang"),
-            thanhToan: getParam("thanhToan"),
-            cuocChinh: getParam("cuocChinh"),
-            dichVuThem: getParam("dichVuThem"),
-            tongThu: getParam("tongThu"),
-            soKien: getParam("soKien"),
-            tlThuc: getParam("tlThuc"),
-            tlQDoi: getParam("tlQDoi"),
-            thuHo: getParam("thuHo"),
-            khaiGia: getParam("khaiGia"),
-            dichVu: getParam("dichVu"),
-            dichVuNhanh: getParam("dichVuNhanh"),
-            ngayGui: getParam("ngayGui"),
-            ngayNhan: getParam("ngayNhan"),
-            ghiChu: getParam("ghiChu")
-        };
-
-        // Validate and set required fields
-        setWithValidation("maVanDon", formData.maVanDon, validateRequired, "Mã vận đơn");
-        setWithValidation("tenNguoiGui", formData.tenNguoiGui, validateRequired, "Tên người gửi");
-        setWithValidation("tenNguoiNhan", formData.tenNguoiNhan, validateRequired, "Tên người nhận");
-
-        // Set duplicate fields for header
-        safeSet("maVanDonDisplay", formData.maVanDon);
-
-        // Validate and set optional fields with validation
-        setWithValidation("soDTGui", formData.soDTGui, validatePhone, "Số điện thoại người gửi");
-        setWithValidation("soDTNhan", formData.soDTNhan, validatePhone, "Số điện thoại người nhận");
-        setWithValidation("soKien", formData.soKien, validateNumeric, "Số kiện");
-        setWithValidation("tlThuc", formData.tlThuc, validateNumeric, "Trọng lượng thực");
-        setWithValidation("tlQDoi", formData.tlQDoi, validateNumeric, "Trọng lượng quy đổi");
-        setWithValidation("cuocChinh", formData.cuocChinh, validateNumeric, "Cước chính");
-        setWithValidation("tongThu", formData.tongThu, validateNumeric, "Tổng thu");
-        setWithValidation("thuHo", formData.thuHo, validateNumeric, "Thu hộ");
-        setWithValidation("khaiGia", formData.khaiGia, validateNumeric, "Khai giá");
-        setWithValidation("ngayGui", formData.ngayGui, validateDate, "Ngày gửi");
-        setWithValidation("ngayNhan", formData.ngayNhan, validateDate, "Ngày nhận");
-
-        // Set remaining fields without specific validation
-        const simpleFields = [
-            "maKHGui", "maBCGui", "maKHNhan", "maBCNhan",
-            "diaChiNguoiGui", "diaChiNguoiNhan", "quanHuyenGui", "tpGui",
-            "quanHuyenNhan", "tpNhan", "tenLHGui", "tenLHNhan",
-            "moTaHang", "thanhToan", "dichVuThem", "dichVu", 
-            "dichVuNhanh", "ghiChu"
-        ];
-
-        simpleFields.forEach(field => {
-            safeSet(field, formData[field]);
-        });
-
-        // Set the duplicate total field
-        safeSet("tongThu2", formData.tongThu);
-
-        // Generate QR code
-        if (formData.maVanDon) {
-            generateQRCode(formData.maVanDon);
-        }
-
-        // Log successful initialization
-        console.log('ECO Invoice initialized successfully');
-
-    } catch (error) {
-        logError('Failed to initialize invoice', error);
-        showUserError('Có lỗi xảy ra khi tải dữ liệu hóa đơn. Vui lòng thử lại.');
-    }
-}
-
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', initializeInvoice);
-
-// Enhanced print function for A5 invoice only
-function printInvoice() {
-    try {
-        // Validate that essential data exists before printing
-        const maVanDon = document.getElementById('maVanDon').textContent.trim();
-        if (!maVanDon) {
-            showUserError('Không thể in: Thiếu mã vận đơn');
-            return;
-        }
-
-        console.log('Preparing to print A5 invoice...');
-        
-        // Set document title for print job
-        const originalTitle = document.title;
-        document.title = `Hóa đơn ECO - ${maVanDon}`;
-        
-        // Trigger print
-        window.print();
-        
-        // Restore original title
-        document.title = originalTitle;
-        
-    } catch (error) {
-        logError('Print function failed', error);
-        showUserError('Có lỗi xảy ra khi in hóa đơn. Vui lòng thử lại.');
-    }
-}
-
-// Handle print events with better logging
-window.addEventListener('beforeprint', function() {
-    console.log('Starting A5 invoice print...');
-    // Hide any elements that shouldn't print
-    document.body.classList.add('printing');
-});
-
-window.addEventListener('afterprint', function() {
-    console.log('A5 invoice print completed');
-    // Restore normal view
-    document.body.classList.remove('printing');
-});
-
-// Handle page errors
-window.addEventListener('error', function(event) {
-    logError('Page error occurred', {
-        message: event.message,
-        filename: event.filename,
-        lineno: event.lineno,
-        colno: event.colno
-    });
-});
-
+// Generate QR code
+document.getElementById("qrCode").style.backgroundImage =
+    "url('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + 
+    encodeURIComponent(getParam("maVanDon") + "')";
 </script>
 
 </body>
