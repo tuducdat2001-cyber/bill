@@ -140,10 +140,11 @@
             border-collapse: collapse;
             font-size: 0.7rem;
         }
+        /* Căn giữa tiêu đề bảng và các giá trị trong bảng */
         .content-table th, .content-table td {
             border: 1px solid #000;
             padding: 3px;
-            text-align: left;
+            text-align: center;
         }
         .content-table th {
             background-color: #f2f2f2;
@@ -158,10 +159,11 @@
             border-collapse: collapse;
             font-size: 0.7rem;
         }
+        /* Căn giữa tiêu đề bảng và các giá trị trong bảng */
         .notes-table th, .notes-table td {
             border: 1px solid #000;
             padding: 3px;
-            text-align: left;
+            text-align: center;
         }
         .notes-table th {
             background-color: #f2f2f2;
@@ -450,7 +452,7 @@
                 <span class="value" id="thuHo"></span>
             </div>
             <div class="total-cost">
-                <span class="label">Tổng phải thu khi phát thư:</span>
+                <span class="label">Tổng phải thu:</span>
                 <span class="value" id="tongPhaiThu"></span>
             </div>
         </div>
@@ -521,13 +523,20 @@
         document.getElementById("noiDungHangHoa").textContent = getParam("noiDungHangHoa");
 
         // Cập nhật thông tin cước phí
-        document.getElementById("thanhToan").textContent = getParam("thanhToan");
-        document.getElementById("cuocChinh").textContent = getParam("cuocChinh");
-        document.getElementById("dichVuThem").textContent = getParam("dichVuThem");
-        document.getElementById("tongCuoc").textContent = getParam("tongCuoc");
-        document.getElementById("thuHo").textContent = getParam("thuHo");
-        document.getElementById("tongPhaiThu").textContent = getParam("tongPhaiThu");
+        // Thêm định dạng tiền tệ và làm đậm các giá trị số tiền
+        document.getElementById("cuocChinh").textContent = formatCurrency(getParam("cuocChinh"));
+        document.getElementById("dichVuThem").textContent = formatCurrency(getParam("dichVuThem"));
+        document.getElementById("tongCuoc").textContent = formatCurrency(getParam("tongCuoc"));
+        document.getElementById("thuHo").textContent = formatCurrency(getParam("thuHo"));
+        document.getElementById("tongPhaiThu").textContent = formatCurrency(getParam("tongPhaiThu"));
     });
+
+    // Hàm định dạng tiền tệ (thêm dấu phẩy và làm đậm)
+    function formatCurrency(amount) {
+        if (!amount) return '0';
+        const formattedAmount = parseInt(amount).toLocaleString('vi-VN');
+        return `<b>${formattedAmount}</b>`;
+    }
 </script>
 
 </body>
