@@ -1,276 +1,560 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>Hóa đơn Vận Tải ECO</title>
-<style>
-@page {
-    size: A5 landscape;
-    margin: 5mm;
-}
-body {
-    font-family: 'Arial', sans-serif;
-    font-size: 12px;
-    background-color: #f5f5f5;
-    padding: 10px;
-}
-.invoice {
-    width: 100%;
-    border: 1px solid #ddd;
-    padding: 10px;
-    box-sizing: border-box;
-    background-color: white;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    border-radius: 5px;
-}
-table {
-    border-collapse: collapse;
-    width: 100%;
-    margin-bottom: 5px;
-}
-td, th {
-    border: 1px solid #ddd;
-    padding: 5px;
-    vertical-align: top;
-}
-.no-border td {
-    border: none;
-}
-.bold { font-weight: bold; }
-.center { text-align: center; }
-.right { text-align: right; }
-.left { text-align: left; }
-.qr {
-    width: 70px;
-    height: 70px;
-    background-size: cover;
-    background-position: center;
-    margin: 0 auto;
-}
-.header {
-    background-color: #2c3e50;
-    color: white;
-    padding: 8px;
-    border-radius: 3px;
-    margin-bottom: 10px;
-}
-h1 {
-    margin: 0;
-    font-size: 20px;
-    color: #e74c3c;
-}
-h2 {
-    margin: 0;
-    font-size: 16px;
-}
-.highlight {
-    background-color: #f8f9fa;
-}
-.total-row {
-    background-color: #e74c3c;
-    color: white;
-    font-weight: bold;
-}
-.print-btn {
-    background-color: #2c3e50;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 10px;
-    font-size: 14px;
-}
-.print-btn:hover {
-    background-color: #1a252f;
-}
-.company-info {
-    line-height: 1.4;
-}
-.bill-code {
-    font-size: 18px;
-    color: #e74c3c;
-    letter-spacing: 1px;
-}
-.section-title {
-    background-color: #ecf0f1;
-    font-weight: bold;
-    padding: 5px;
-}
-.signature-area {
-    height: 50px;
-    border-top: 1px dashed #ccc;
-    margin-top: 30px;
-    padding-top: 5px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hóa Đơn Vận Tải Eco</title>
+    <!-- Thư viện JsBarcode để tạo mã vạch -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        /* CSS cho toàn bộ trang */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Container chính của hóa đơn */
+        .bill-container {
+            width: 8.5in;
+            background-color: white;
+            border: 1px solid #000;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            padding: 5px; /* Giảm padding để tiết kiệm không gian */
+            display: flex;
+            flex-direction: column;
+            gap: 5px; /* Giảm khoảng cách giữa các phần */
+        }
+
+        /* Header - Vận tải ECO và mã vạch */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        /* CSS cho QR code trong header */
+        .header-left .qr-code {
+            width: 40px; /* Kích thước nhỏ hơn cho QR code */
+            height: 40px;
+            margin-right: 5px;
+        }
+
+        .header-left svg {
+            width: 40px; /* Giảm kích thước logo */
+            height: 40px;
+            margin-right: 5px;
+        }
+
+        .company-info h1 {
+            font-size: 1rem; /* Giảm cỡ chữ */
+            font-weight: bold;
+            margin: 0;
+            color: #000;
+        }
+
+        .company-info h2 {
+            font-size: 0.7rem; /* Giảm cỡ chữ */
+            font-weight: normal;
+            margin: 0;
+        }
+        
+        .company-info p {
+            font-size: 0.6rem; /* Giảm cỡ chữ */
+            margin: 1px 0;
+            line-height: 1.2;
+        }
+
+        .hotline {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+        
+        /* Cập nhật CSS để mã vạch hiển thị đúng và lớn hơn */
+        .header-right #barcode-svg {
+            display: block;
+            margin-bottom: 5px;
+            width: 180px; /* Tăng chiều rộng */
+            height: 50px; /* Tăng chiều cao */
+            background-color: transparent; /* Không có nền */
+            color: #000;
+        }
+
+        /* Phần thông tin người gửi/nhận */
+        .info-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 1px solid #000;
+            flex-grow: 1;
+        }
+
+        .info-panel {
+            padding: 3px 5px; /* Giảm padding */
+        }
+
+        .info-panel.border-right {
+            border-right: 1px solid #000;
+        }
+
+        .info-panel .item {
+            display: flex;
+            font-size: 0.7rem; /* Giảm cỡ chữ */
+            margin-bottom: 3px; /* Giảm khoảng cách */
+        }
+        .info-panel .item .label {
+            font-weight: bold;
+            min-width: 80px; /* Giảm min-width */
+            white-space: nowrap;
+        }
+
+        /* Phần hàng hóa và cước phí */
+        .content-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            border-bottom: 1px solid #000;
+            flex-grow: 1;
+        }
+        .main-content {
+            border-right: 1px solid #000;
+        }
+        .content-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.7rem; /* Giảm cỡ chữ */
+        }
+        .content-table th, .content-table td {
+            border: 1px solid #000;
+            padding: 3px; /* Giảm padding */
+            text-align: left;
+        }
+        .content-table th {
+            background-color: #f2f2f2;
+        }
+        .notes-table {
+            border-top: 1px solid #000;
+            padding: 3px 5px; /* Giảm padding */
+        }
+        .notes-table .item {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px; /* Giảm khoảng cách */
+            font-size: 0.7rem; /* Giảm cỡ chữ */
+        }
+        .notes-table .label {
+            font-weight: bold;
+        }
+        .notes-table .value {
+            border-bottom: 1px solid #000;
+        }
+        .side-content {
+            padding: 3px 5px; /* Giảm padding */
+        }
+        .side-content .item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem; /* Giảm cỡ chữ */
+            margin-bottom: 3px; /* Giảm khoảng cách */
+        }
+        .side-content .item .label {
+            font-weight: bold;
+        }
+        .side-content .item .value {
+            text-align: right;
+            border-bottom: 1px dashed #000;
+            min-width: 50px; /* Giảm min-width */
+        }
+        .side-content .total-cost {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px; /* Giảm khoảng cách */
+            padding-top: 3px; /* Giảm padding */
+            border-top: 1px solid #000;
+        }
+        .side-content .total-cost .label {
+            font-weight: bold;
+        }
+        .side-content .total-cost .value {
+            font-size: 0.9rem; /* Giảm cỡ chữ */
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        /* Chữ ký và các thông tin khác */
+        .signature-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            text-align: center;
+            font-size: 0.7rem; /* Giảm cỡ chữ */
+            border-top: 1px solid #000;
+            padding-bottom: 5px;
+        }
+        .signature-box {
+            padding: 5px; /* Giảm padding */
+            min-height: 2cm; /* Giữ nguyên chiều cao tối thiểu */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Sửa đổi: Đưa nội dung lên đầu */
+            gap: 5px; /* Thêm khoảng cách giữa các phần tử */
+        }
+        .signature-box.border-right {
+            border-right: 1px solid #000;
+        }
+        .signature-box p {
+            margin: 0;
+            line-height: 1.5; /* Giảm line-height */
+        }
+        .signature-box .date-time {
+            margin-bottom: 0; /* Sửa đổi: Xóa margin-bottom để chúng sát hơn */
+            border-bottom: 1px dashed #000;
+        }
+        
+        .recipient-signature {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 10px; /* Giảm margin */
+        }
+
+        .recipient-signature .employee-label {
+            margin-left: auto;
+            text-align: right;
+            line-height: 1.2;
+            padding-left: 10px; /* Giảm padding */
+        }
+
+
+        /* Footer */
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* Căn trên các phần tử con */
+            margin-top: 5px;
+            font-size: 0.7rem;
+        }
+        .footer-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            text-align: center;
+        }
+        .footer-left p {
+            margin: 0;
+            line-height: 1.2;
+        }
+        .footer-right {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            justify-content: flex-end;
+        }
+        .footer-right .checkbox-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .footer-right .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .footer-right input[type="checkbox"] {
+            transform: scale(1.0);
+            accent-color: #000;
+        }
+
+        .print-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 0.8rem;
+        }
+
+        /* Thêm CSS để tối ưu hóa cho in khổ giấy A5 ngang */
+        @media print {
+            /* Đặt lề in trực tiếp trên trang, không phải trên container */
+            @page {
+                size: A5 landscape;
+                margin: 1cm; /* Đặt lề 1cm cho toàn bộ trang */
+            }
+
+            body {
+                background-color: #fff;
+                margin: 0;
+                padding: 0;
+            }
+
+            .bill-container {
+                /* Xóa kích thước cố định và padding để nó tự động lấp đầy trang in */
+                width: auto;
+                height: auto;
+                border: none;
+                box-shadow: none;
+                padding: 0;
+
+                /* Sử dụng flexbox để co giãn nội dung vừa vặn */
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            /* Các phần tử bên trong container sẽ chiếm đủ không gian */
+            .header, .info-section, .content-section, .signature-section, .footer {
+                flex-shrink: 0;
+                flex-grow: 0;
+            }
+            .content-section {
+                flex-grow: 1;
+            }
+            
+            .print-button {
+                display: none; /* Ẩn nút in khi in */
+            }
+        }
+    </style>
 </head>
 <body>
 
-<div class="invoice">
-    <!-- Header -->
+<div class="bill-container">
+    <!-- Header: Logo, tên công ty và mã vạch -->
     <div class="header">
-        <table class="no-border">
-            <tr>
-                <td style="width: 70%;" class="company-info">
-                    <h1>VẬN TẢI ECO</h1>
-                    <div>VẬN CHUYỂN HÀNG HÓA BẮC - NAM</div>
-                    <div>Hotline: <span class="bold">0946 936 999 - 0888 805 625</span></div>
-                    <div>Email: info@vantaieco.com - Website: www.vantaieco.com</div>
-                </td>
-                <td class="right">
-                    <div class="bill-code">*<span id="maVanDon"></span>*</div>
-                    <div style="margin-top: 10px;">HÓA ĐƠN VẬN CHUYỂN</div>
-                </td>
-            </tr>
-        </table>
+        <div class="header-left">
+            <!-- QR code -->
+            <img class="qr-code" src="https://placehold.co/50x50?text=QR+Code" alt="QR Code">
+            <!-- SVG logo -->
+            <svg width="40" height="40" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="25" cy="25" r="20" fill="#e0f0ff" stroke="#0066cc" stroke-width="2"/>
+                <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#0066cc" font-weight="bold">ECO</text>
+            </svg>
+            <div class="company-info">
+                <h1>VẬN TẢI ECO</h1>
+                <h2>VẬN CHUYỂN HÀNG HOÁ BẮC - NAM</h2>
+                <p>Express & Exacting</p>
+                <p class="hotline">Hotline 0946 936 999-0888.805.625</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <!-- Mã vạch được tạo tự động -->
+            <svg id="barcode-svg"></svg>
+        </div>
+    </div>
+    
+    <!-- Phần thông tin người gửi và người nhận -->
+    <div class="info-section">
+        <div class="info-panel border-right">
+            <div class="item">
+                <span class="label">Tên khách gửi:</span>
+                <span class="value" id="tenNguoiGui"></span>
+            </div>
+            <div class="item">
+                <span class="label">Địa chỉ:</span>
+                <span class="value" id="diaChiNguoiGui"></span>
+            </div>
+            <div class="item">
+                <span class="label">Xã, Phường:</span>
+                <span class="value" id="xaPhuongGui"></span>
+            </div>
+            <div class="item">
+                <span class="label">Tỉnh/ TP:</span>
+                <span class="value" id="tinhTPGui"></span>
+            </div>
+            <div class="item">
+                <span class="label">Số điện thoại:</span>
+                <span class="value" id="sdtNguoiGui"></span>
+            </div>
+        </div>
+        <div class="info-panel">
+            <div class="item">
+                <span class="label">Tên khách nhận:</span>
+                <span class="value" id="tenNguoiNhan"></span>
+            </div>
+            <div class="item">
+                <span class="label">Địa chỉ:</span>
+                <span class="value" id="diaChiNguoiNhan"></span>
+            </div>
+            <div class="item">
+                <span class="label">Xã, Phường:</span>
+                <span class="value" id="xaPhuongNhan"></span>
+            </div>
+            <div class="item">
+                <span class="label">Tỉnh/ TP:</span>
+                <span class="value" id="tinhTPNhan"></span>
+            </div>
+            <div class="item">
+                <span class="label">Số điện thoại:</span>
+                <span class="value" id="sdtNguoiNhan"></span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Phần hàng hóa và cước phí -->
+    <div class="content-section">
+        <div class="main-content">
+            <div class="content-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Số kiện</th>
+                            <th>Trọng lượng thực</th>
+                            <th>Dịch vụ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="soKien"></td>
+                            <td id="tlThuc"></td>
+                            <td id="dichVuTrongBang"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="notes-table">
+                <div class="item">
+                    <div>
+                        <span class="label">Ghi chú</span>
+                        <div class="value" id="ghiChu"></div>
+                    </div>
+                    <div>
+                        <span class="label">Nội dung hàng hoá</span>
+                        <div class="value" id="noiDungHangHoa"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="side-content">
+            <div class="item">
+                <span class="label">Hình thức thanh toán:</span>
+                <span class="value" id="thanhToan"></span>
+            </div>
+            <div class="item">
+                <span class="label">Cước chính:</span>
+                <span class="value" id="cuocChinh"></span>
+            </div>
+            <div class="item">
+                <span class="label">Dịch vụ cộng thêm:</span>
+                <span class="value" id="dichVuThem"></span>
+            </div>
+            <div class="item">
+                <span class="label">Tổng cước:</span>
+                <span class="value" id="tongCuoc"></span>
+            </div>
+            <div class="total-cost">
+                <span class="label">Thu hộ:</span>
+                <span class="value" id="thuHo"></span>
+            </div>
+            <div class="total-cost">
+                <span class="label">Tổng phải thu khi phát thư:</span>
+                <span class="value" id="tongPhaiThu"></span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Phần chữ ký -->
+    <div class="signature-section">
+        <div class="signature-box border-right">
+            <p class="date-time">Ngày giờ gửi . . . . . . . . . . . . . . . . . . . . . .</p>
+            <p>Họ tên và chữ ký người gửi</p>
+        </div>
+        <div class="signature-box border-right">
+            <p class="date-time">Ngày giờ nhận . . . . . . . . . . . . . . . . . . . . . .</p>
+            <p>Họ tên và chữ ký người nhận</p>
+        </div>
+        <div class="signature-box">
+            <p class="date-time">Ngày giờ nhận . . . . . . . . . . . . . . . . . . . . . .</p>
+            <p>Nhân viên nhận ký</p>
+        </div>
     </div>
 
-    <!-- Thông tin khách hàng -->
-    <div class="section-title">THÔNG TIN KHÁCH HÀNG</div>
-    <table>
-        <tr>
-            <td style="width: 50%;" class="highlight">
-                <div class="bold">NGƯỜI GỬI</div>
-                <div>Mã KH: <span id="maKHGui"></span> | Mã BC: <span id="maBCGui"></span></div>
-                <div>Tên: <span id="tenNguoiGui"></span></div>
-                <div>Địa chỉ: <span id="diaChiNguoiGui"></span></div>
-                <div><span id="quanHuyenGui"></span>, <span id="tpGui"></span></div>
-                <div>Điện thoại: <span id="soDTGui"></span> | Liên hệ: <span id="tenLHGui"></span></div>
-            </td>
-            <td style="width: 50%;" class="highlight">
-                <div class="bold">NGƯỜI NHẬN</div>
-                <div>Mã KH: <span id="maKHNhan"></span> | Mã BC: <span id="maBCNhan"></span></div>
-                <div>Tên: <span id="tenNguoiNhan"></span></div>
-                <div>Địa chỉ: <span id="diaChiNguoiNhan"></span></div>
-                <div><span id="quanHuyenNhan"></span>, <span id="tpNhan"></span></div>
-                <div>Điện thoại: <span id="soDTNhan"></span> | Liên hệ: <span id="tenLHNhan"></span></div>
-            </td>
-        </tr>
-    </table>
-
-    <!-- Thông tin hàng hóa -->
-    <div class="section-title">THÔNG TIN HÀNG HÓA</div>
-    <table>
-        <tr>
-            <td colspan="2">Mô tả hàng hoá: <span id="moTaHang"></span></td>
-            <td>Hình thức thanh toán: <span id="thanhToan"></span></td>
-            <td>Cước chính: <span id="cuocChinh"></span></td>
-        </tr>
-        <tr>
-            <td>Dịch vụ cộng thêm: <span id="dichVuThem"></span></td>
-            <td>Tổng cước: <span id="tongThu"></span></td>
-            <td colspan="2" class="total-row">TỔNG PHẢI THU KHI PHÁT: <span id="tongThu2"></span></td>
-        </tr>
-    </table>
-
-    <!-- Thông tin kiện hàng -->
-    <div class="section-title">THÔNG TIN KIỆN HÀNG</div>
-    <table>
-        <tr>
-            <td>Số kiện: <span id="soKien"></span></td>
-            <td>Trọng lượng thực: <span id="tlThuc"></span></td>
-            <td>Trọng lượng quy đổi: <span id="tlQDoi"></span></td>
-            <td>Thu hộ: <span id="thuHo"></span></td>
-        </tr>
-        <tr>
-            <td>Khai giá: <span id="khaiGia"></span></td>
-            <td colspan="3">Ghi chú: </td>
-        </tr>
-    </table>
-
-    <!-- Thông tin dịch vụ -->
-    <div class="section-title">THÔNG TIN DỊCH VỤ</div>
-    <table>
-        <tr>
-            <td>Dịch vụ: <span id="dichVu"></span></td>
-            <td>D.vụ gtgt: <span id="dichVuNhanh"></span></td>
-            <td rowspan="3" class="center">
-                <div class="qr" id="qrCode"></div>
-                <div>Quét mã QR để theo dõi đơn hàng</div>
-            </td>
-            <td>Mã NV nhận: </td>
-            <td>Mã NV phát: </td>
-        </tr>
-        <tr>
-            <td>Ngày giờ gửi: <span id="ngayGui"></span></td>
-            <td>Ngày giờ nhận: <span id="ngayNhan"></span></td>
-            <td colspan="2">Tình trạng: □ Chuyển hoàn □ Hủy</td>
-        </tr>
-        <tr>
-            <td colspan="2" class="center signature-area">
-                <div>Họ tên & chữ ký người gửi</div>
-            </td>
-            <td colspan="2" class="center signature-area">
-                <div>Họ tên & chữ ký người nhận</div>
-            </td>
-        </tr>
-    </table>
-
-    <!-- Footer -->
-    <div style="margin-top: 10px; font-size: 11px; text-align: center;">
-        <div>Cảm ơn Quý khách đã sử dụng dịch vụ của chúng tôi!</div>
-        <div>Mọi thắc mắc xin liên hệ hotline: 0946 936 999</div>
+    <!-- Footer: Dịch vụ và các tùy chọn khác -->
+    <div class="footer">
+        <div class="footer-left">
+            <button class="print-button" onclick="window.print()">🖨 In hóa đơn</button>
+        </div>
+        <div class="footer-right">
+            <div class="checkbox-row">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="chuyen_hoan">
+                    <label for="chuyen_hoan">Chuyển hoàn</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="huy">
+                    <label for="huy">Huỷ</label>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<p class="center"><button class="print-btn" onclick="window.print()">🖨 IN HÓA ĐƠN</button></p>
-
 <script>
-function getParam(name) {
-    return new URLSearchParams(window.location.search).get(name) || '';
-}
-function formatCurrency(value) {
-    if (!value) return '0 đ';
-    return Number(value).toLocaleString('vi-VN') + ' đ';
-}
-function set(id, val) {
-    const element = document.getElementById(id);
-    if (element) element.innerText = val;
-}
-function setCurrency(id, val) {
-    const element = document.getElementById(id);
-    if (element) element.innerText = formatCurrency(val);
-}
+    // Hàm lấy giá trị từ URL Parameter
+    function getParam(name) {
+        return new URLSearchParams(window.location.search).get(name) || '';
+    }
 
-// Set values from URL parameters
-set("maVanDon", getParam("maVanDon"));
-set("maKHGui", getParam("maKHGui"));
-set("maBCGui", getParam("maBCGui"));
-set("maKHNhan", getParam("maKHNhan"));
-set("maBCNhan", getParam("maBCNhan"));
-set("tenNguoiGui", getParam("tenNguoiGui"));
-set("diaChiNguoiGui", getParam("diaChiNguoiGui"));
-set("tenNguoiNhan", getParam("tenNguoiNhan"));
-set("diaChiNguoiNhan", getParam("diaChiNguoiNhan"));
-set("quanHuyenGui", getParam("quanHuyenGui"));
-set("tpGui", getParam("tpGui"));
-set("quanHuyenNhan", getParam("quanHuyenNhan"));
-set("tpNhan", getParam("tpNhan"));
-set("soDTGui", getParam("soDTGui"));
-set("tenLHGui", getParam("tenLHGui"));
-set("soDTNhan", getParam("soDTNhan"));
-set("tenLHNhan", getParam("tenLHNhan"));
-set("moTaHang", getParam("moTaHang"));
-set("thanhToan", getParam("thanhToan"));
-setCurrency("cuocChinh", getParam("cuocChinh"));
-set("dichVuThem", getParam("dichVuThem"));
-setCurrency("tongThu", getParam("tongThu"));
-setCurrency("tongThu2", getParam("tongThu"));
-set("soKien", getParam("soKien"));
-set("tlThuc", getParam("tlThuc") + ' kg');
-set("tlQDoi", getParam("tlQDoi") + ' kg');
-setCurrency("thuHo", getParam("thuHo"));
-setCurrency("khaiGia", getParam("khaiGia"));
-set("dichVu", getParam("dichVu"));
-set("dichVuNhanh", getParam("dichVuNhanh"));
-set("ngayGui", getParam("ngayGui") || new Date().toLocaleString());
-set("ngayNhan", getParam("ngayNhan"));
+    document.addEventListener('DOMContentLoaded', (event) => {
+        // Lấy mã vận đơn từ URL hoặc dùng giá trị mặc định
+        const orderNumber = getParam("maVanDon") || "ECO105327";
 
-// Generate QR code
-document.getElementById("qrCode").style.backgroundImage =
-    "url('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + 
-    encodeURIComponent(getParam("maVanDon") + "')";
+        // Tạo mã vạch bằng JsBarcode với mã vận đơn đã lấy
+        JsBarcode("#barcode-svg", orderNumber, {
+            format: "CODE128",
+            displayValue: true,
+            fontSize: 18,
+            width: 2,
+            height: 50,
+        });
+
+        // Cập nhật các trường dữ liệu khác dựa trên URL
+        document.getElementById("tenNguoiGui").textContent = getParam("tenNguoiGui");
+        document.getElementById("diaChiNguoiGui").textContent = getParam("diaChiNguoiGui");
+        document.getElementById("xaPhuongGui").textContent = getParam("xaPhuongGui");
+        document.getElementById("tinhTPGui").textContent = getParam("tinhTPGui");
+        document.getElementById("sdtNguoiGui").textContent = getParam("sdtNguoiGui");
+
+        document.getElementById("tenNguoiNhan").textContent = getParam("tenNguoiNhan");
+        document.getElementById("diaChiNguoiNhan").textContent = getParam("diaChiNguoiNhan");
+        document.getElementById("xaPhuongNhan").textContent = getParam("xaPhuongNhan");
+        document.getElementById("tinhTPNhan").textContent = getParam("tinhTPNhan");
+        document.getElementById("sdtNguoiNhan").textContent = getParam("sdtNguoiNhan");
+        
+        // Cập nhật thông tin hàng hóa
+        document.getElementById("soKien").textContent = getParam("soKien");
+        document.getElementById("tlThuc").textContent = getParam("tlThuc");
+        // Cập nhật dịch vụ từ URL, nếu không có sẽ là chuỗi rỗng
+        document.getElementById("dichVuTrongBang").textContent = getParam("dichVu");
+        document.getElementById("ghiChu").textContent = getParam("ghiChu");
+        document.getElementById("noiDungHangHoa").textContent = getParam("noiDungHangHoa");
+
+        // Cập nhật thông tin cước phí
+        document.getElementById("thanhToan").textContent = getParam("thanhToan");
+        document.getElementById("cuocChinh").textContent = getParam("cuocChinh");
+        document.getElementById("dichVuThem").textContent = getParam("dichVuThem");
+        document.getElementById("tongCuoc").textContent = getParam("tongCuoc");
+        document.getElementById("thuHo").textContent = getParam("thuHo");
+        document.getElementById("tongPhaiThu").textContent = getParam("tongPhaiThu");
+    });
 </script>
 
 </body>
