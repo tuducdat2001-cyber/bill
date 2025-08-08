@@ -19,9 +19,9 @@
             min-height: 100vh;
         }
 
-        /* Container chính của hóa đơn */
+        /* Container chính của hóa đơn - Tăng kích thước lên 1.15 lần */
         .bill-container {
-            width: 8.5in;
+            width: calc(8.5in * 1.15); /* Tăng chiều rộng lên 1.15 lần */
             background-color: white;
             border: 1px solid #000;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -30,6 +30,7 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
+            font-size: 1.15em; /* Tăng kích thước chữ tổng thể */
         }
 
         /* Header - Vận tải ECO và mã vạch */
@@ -49,9 +50,9 @@
         
         /* CSS cho logo và QR code trong header */
         .header-left .logo, .header-left .qr-code {
-            width: 40px;
-            height: 40px;
-            margin-right: 5px;
+            width: calc(40px * 1.15); /* Tăng kích thước logo */
+            height: calc(40px * 1.15);
+            margin-right: calc(5px * 1.15);
         }
         
         /* Loại bỏ CSS của SVG cũ */
@@ -60,20 +61,20 @@
         }
 
         .company-info h1 {
-            font-size: 1rem;
+            font-size: 1.15rem;
             font-weight: bold;
             margin: 0;
             color: #000;
         }
 
         .company-info h2 {
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             font-weight: normal;
             margin: 0;
         }
         
         .company-info p {
-            font-size: 0.6rem;
+            font-size: 0.7rem;
             margin: 1px 0;
             line-height: 1.2;
         }
@@ -91,8 +92,8 @@
         .header-right #barcode-svg {
             display: block;
             margin-bottom: 5px;
-            width: 180px;
-            height: 50px;
+            width: calc(180px * 1.15);
+            height: calc(50px * 1.15);
             background-color: transparent;
             color: #000;
         }
@@ -115,12 +116,12 @@
 
         .info-panel .item {
             display: flex;
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             margin-bottom: 3px;
         }
         .info-panel .item .label {
             font-weight: bold;
-            min-width: 80px;
+            min-width: 90px;
             white-space: nowrap;
         }
 
@@ -137,7 +138,7 @@
         .content-table table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             table-layout: fixed; /* Đảm bảo các cột có chiều rộng bằng nhau */
         }
         /* Căn giữa tiêu đề bảng và các giá trị trong bảng */
@@ -157,7 +158,7 @@
         .notes-table table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             table-layout: fixed; /* Chia đều hai cột */
         }
         /* Căn giữa tiêu đề bảng và các giá trị trong bảng */
@@ -177,7 +178,7 @@
         .side-content .item {
             display: flex;
             justify-content: space-between;
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             margin-bottom: 3px;
         }
         .side-content .item .label {
@@ -191,7 +192,7 @@
         
         /* CSS mới để tăng kích thước số tiền */
         .side-content .value-money {
-            font-size: 0.9rem; /* Tăng kích thước phông chữ */
+            font-size: 1.1rem; /* Tăng kích thước phông chữ */
             font-weight: normal; /* Bỏ in đậm */
             text-align: right;
             border-bottom: 1px dashed #000;
@@ -211,7 +212,7 @@
         }
         /* CSS mới để tăng kích thước và bỏ in đậm cho tổng phải thu */
         .side-content .total-cost .value-money {
-            font-size: 1.1rem; /* Tăng kích thước lớn hơn nữa */
+            font-size: 1.3rem; /* Tăng kích thước lớn hơn nữa */
             font-weight: normal; /* Bỏ in đậm */
             color: #e74c3c;
         }
@@ -221,7 +222,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             text-align: center;
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             border-top: 1px solid #000;
             padding-bottom: 5px;
         }
@@ -266,7 +267,7 @@
             justify-content: space-between;
             align-items: flex-start;
             margin-top: 5px;
-            font-size: 0.7rem;
+            font-size: 0.8rem;
         }
         .footer-left {
             display: flex;
@@ -287,7 +288,7 @@
             padding: 8px 12px;
             cursor: pointer;
             border-radius: 5px;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
         }
 
         /* Thêm CSS để tối ưu hóa cho in khổ giấy A5 ngang */
@@ -408,19 +409,20 @@
                 <table>
                     <thead>
                         <tr>
-                            <!-- Đã đổi vị trí Dịch vụ và Số kiện -->
+                            <!-- Đã đổi vị trí Số kiện và Trọng lượng và thêm cột Thể tích -->
                             <th>Dịch vụ</th>
-                            <!-- Đã xóa chữ 'thực' -->
-                            <th>Trọng lượng</th>
                             <th>Số kiện</th>
+                            <th>Trọng lượng</th>
+                            <th>Thể tích</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <!-- Đã đổi vị trí td tương ứng -->
+                            <!-- Cập nhật các td tương ứng -->
                             <td id="dichVuTrongBang"></td>
-                            <td id="tlThuc"></td>
                             <td id="soKien"></td>
+                            <td id="tlThuc"></td>
+                            <td id="thetich"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -530,8 +532,12 @@
         
         // Cập nhật thông tin hàng hóa
         document.getElementById("soKien").textContent = getParam("soKien");
-        document.getElementById("tlThuc").textContent = getParam("tlThuc");
-        // Cập nhật dịch vụ từ URL, nếu không có sẽ là chuỗi rỗng
+        // Thêm đơn vị kg vào sau giá trị
+        const tlThucValue = getParam("tlThuc");
+        document.getElementById("tlThuc").textContent = tlThucValue ? `${tlThucValue} kg` : '';
+        // Thêm đơn vị m³ vào sau giá trị thể tích
+        const thetichValue = getParam("thetich");
+        document.getElementById("thetich").textContent = thetichValue ? `${thetichValue} m³` : '';
         document.getElementById("dichVuTrongBang").textContent = getParam("dichVu");
         document.getElementById("ghiChu").textContent = getParam("ghiChu");
         document.getElementById("noiDungHangHoa").textContent = getParam("noiDungHangHoa");
