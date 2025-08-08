@@ -525,13 +525,12 @@
         document.getElementById("ghiChu").textContent = getParam("ghiChu");
         document.getElementById("noiDungHangHoa").textContent = getParam("noiDungHangHoa");
 
-        // Cập nhật thông tin cước phí
-        // Thêm định dạng tiền tệ và làm đậm các giá trị số tiền
-        document.getElementById("cuocChinh").textContent = formatCurrency(getParam("cuocChinh"));
-        document.getElementById("dichVuThem").textContent = formatCurrency(getParam("dichVuThem"));
-        document.getElementById("tongCuoc").textContent = formatCurrency(getParam("tongCuoc"));
-        document.getElementById("thuHo").textContent = formatCurrency(getParam("thuHo"));
-        document.getElementById("tongPhaiThu").textContent = formatCurrency(getParam("tongPhaiThu"));
+        // Cập nhật thông tin cước phí bằng innerHTML để hiển thị đúng thẻ <b>
+        document.getElementById("cuocChinh").innerHTML = formatCurrency(getParam("cuocChinh"));
+        document.getElementById("dichVuThem").innerHTML = formatCurrency(getParam("dichVuThem"));
+        document.getElementById("tongCuoc").innerHTML = formatCurrency(getParam("tongCuoc"));
+        document.getElementById("thuHo").innerHTML = formatCurrency(getParam("thuHo"));
+        document.getElementById("tongPhaiThu").innerHTML = formatCurrency(getParam("tongPhaiThu"));
     });
 
     // Hàm định dạng tiền tệ (thêm dấu phẩy và làm đậm)
