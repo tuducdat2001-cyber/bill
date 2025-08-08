@@ -11,24 +11,29 @@
 body {
     font-family: Arial, sans-serif;
     font-size: 12px;
+    margin: 0;
+    padding: 10px;
 }
 .invoice {
     width: 100%;
-    border: 1px solid #000;
-    padding: 5px;
+    border: 2px solid #000;
+    padding: 8px;
     box-sizing: border-box;
 }
 table {
     border-collapse: collapse;
     width: 100%;
+    margin-bottom: 2px;
 }
 td, th {
     border: 1px solid #000;
-    padding: 3px;
+    padding: 4px;
     vertical-align: top;
+    font-size: 11px;
 }
 .no-border td {
     border: none;
+    padding: 2px;
 }
 .bold { font-weight: bold; }
 .center { text-align: center; }
@@ -38,6 +43,8 @@ td, th {
     height: 60px;
     background-size: cover;
     background-position: center;
+    border: 1px solid #ccc;
+    display: inline-block;
 }
 h1 {
     margin: 0;
@@ -46,6 +53,26 @@ h1 {
 h2 {
     margin: 0;
     font-size: 14px;
+}
+.error {
+    color: red;
+    font-weight: bold;
+}
+.warning {
+    color: orange;
+    font-style: italic;
+}
+.header-code {
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+}
+.company-name {
+    font-size: 14px;
+    font-weight: bold;
+}
+.hotline {
+    font-size: 11px;
 }
 </style>
 </head>
@@ -56,12 +83,13 @@ h2 {
     <table class="no-border">
         <tr>
             <td style="width: 65%;">
-                <div class="bold" style="font-size:16px;">VẬN TẢI ECO</div>
-                VẬN CHUYỂN HÀNG HÓA BẮC - NAM<br>
-                Hotline: <span class="bold">0946 936 999 - 0888 805 625</span>
+                <div class="company-name">VẬN TẢI ECO</div>
+                <div style="font-size: 11px;">VẬN CHUYỂN HÀNG HÓA BẮC - NAM</div>
+                <div class="hotline">Hotline: <span class="bold">0946 936 999 - 0888 805 625</span></div>
             </td>
             <td class="right">
-                <div class="bold" style="font-size: 16px;">*<span id="maVanDon"></span>*</div>
+                <div class="header-code">*<span id="maVanDon"></span>*</div>
+                <div style="font-size: 10px; margin-top: 5px;" id="maVanDonDisplay"></div>
             </td>
         </tr>
     </table>
@@ -69,10 +97,10 @@ h2 {
     <!-- Mã KH -->
     <table>
         <tr>
-            <td>Mã KH gửi: <span id="maKHGui"></span></td>
-            <td>Mã BC gửi: <span id="maBCGui"></span></td>
-            <td>Mã KH nhận: <span id="maKHNhan"></span></td>
-            <td>Mã BC nhận: <span id="maBCNhan"></span></td>
+            <td style="width: 25%;">Mã KH gửi: <span id="maKHGui"></span></td>
+            <td style="width: 25%;">Mã BC gửi: <span id="maBCGui"></span></td>
+            <td style="width: 25%;">Mã KH nhận: <span id="maKHNhan"></span></td>
+            <td style="width: 25%;">Mã BC nhận: <span id="maBCNhan"></span></td>
         </tr>
         <tr>
             <td colspan="2">
@@ -122,7 +150,7 @@ h2 {
         </tr>
         <tr>
             <td>Khai giá: <span id="khaiGia"></span></td>
-            <td colspan="3">Ghi chú: </td>
+            <td colspan="3">Ghi chú: <span id="ghiChu"></span></td>
         </tr>
     </table>
 
@@ -131,9 +159,9 @@ h2 {
         <tr>
             <td>Dịch vụ: <span id="dichVu"></span></td>
             <td>D.vụ gtgt: <span id="dichVuNhanh"></span></td>
-            <td rowspan="3" class="center">
-                <div class="qr" id="qrCode"></div>
-                Quét QR xem chính sách
+            <td rowspan="3" class="center" style="width: 80px;">
+                <div class="qr" id="qrCode"></div><br>
+                <div style="font-size: 9px; margin-top: 2px;">Quét QR xem chính sách</div>
             </td>
             <td>Mã nhân viên nhận</td>
             <td>Mã nhân viên phát</td>
@@ -153,46 +181,281 @@ h2 {
 <p class="center"><button onclick="window.print()">🖨 In hóa đơn</button></p>
 
 <script>
+// Error handling utilities
+function logError(message, context) {
+    console.error(`ECO Invoice Error: ${message}`, context);
+}
+
+function showUserError(message) {
+    // Could be enhanced with toast notifications or modal dialogs
+    alert(`Lỗi: ${message}`);
+}
+
+// Safe parameter extraction with validation
 function getParam(name) {
-    return new URLSearchParams(window.location.search).get(name) || '';
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const value = urlParams.get(name);
+        return value ? value.trim() : '';
+    } catch (error) {
+        logError(`Failed to get parameter: ${name}`, error);
+        return '';
+    }
 }
-function set(id, val) {
-    document.getElementById(id).innerText = val;
+
+// Validation functions
+function validateRequired(value, fieldName) {
+    if (!value || value.trim() === '') {
+        return {
+            isValid: false,
+            message: `${fieldName} là bắt buộc`
+        };
+    }
+    return { isValid: true };
 }
-set("maVanDon", getParam("maVanDon"));
-set("maKHGui", getParam("maKHGui"));
-set("maBCGui", getParam("maBCGui"));
-set("maKHNhan", getParam("maKHNhan"));
-set("maBCNhan", getParam("maBCNhan"));
-set("tenNguoiGui", getParam("tenNguoiGui"));
-set("diaChiNguoiGui", getParam("diaChiNguoiGui"));
-set("tenNguoiNhan", getParam("tenNguoiNhan"));
-set("diaChiNguoiNhan", getParam("diaChiNguoiNhan"));
-set("quanHuyenGui", getParam("quanHuyenGui"));
-set("tpGui", getParam("tpGui"));
-set("quanHuyenNhan", getParam("quanHuyenNhan"));
-set("tpNhan", getParam("tpNhan"));
-set("soDTGui", getParam("soDTGui"));
-set("tenLHGui", getParam("tenLHGui"));
-set("soDTNhan", getParam("soDTNhan"));
-set("tenLHNhan", getParam("tenLHNhan"));
-set("moTaHang", getParam("moTaHang"));
-set("thanhToan", getParam("thanhToan"));
-set("cuocChinh", getParam("cuocChinh"));
-set("dichVuThem", getParam("dichVuThem"));
-set("tongThu", getParam("tongThu"));
-set("tongThu2", getParam("tongThu"));
-set("soKien", getParam("soKien"));
-set("tlThuc", getParam("tlThuc"));
-set("tlQDoi", getParam("tlQDoi"));
-set("thuHo", getParam("thuHo"));
-set("khaiGia", getParam("khaiGia"));
-set("dichVu", getParam("dichVu"));
-set("dichVuNhanh", getParam("dichVuNhanh"));
-set("ngayGui", getParam("ngayGui"));
-set("ngayNhan", getParam("ngayNhan"));
-document.getElementById("qrCode").style.backgroundImage =
-    "url('https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=" + encodeURIComponent(getParam("maVanDon")) + "')";
+
+function validatePhone(phone) {
+    if (!phone) return { isValid: true }; // Optional field
+    
+    const phoneRegex = /^[0-9\s\-\+\(\)]{10,15}$/;
+    if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
+        return {
+            isValid: false,
+            message: 'Số điện thoại không hợp lệ'
+        };
+    }
+    return { isValid: true };
+}
+
+function validateNumeric(value, fieldName) {
+    if (!value) return { isValid: true }; // Optional field
+    
+    if (isNaN(value) || value < 0) {
+        return {
+            isValid: false,
+            message: `${fieldName} phải là số hợp lệ`
+        };
+    }
+    return { isValid: true };
+}
+
+function validateDate(dateStr) {
+    if (!dateStr) return { isValid: true }; // Optional field
+    
+    // Accept various Vietnamese date formats
+    const dateFormats = [
+        /^\d{1,2}\/\d{1,2}\/\d{4}$/,
+        /^\d{1,2}-\d{1,2}-\d{4}$/,
+        /^\d{4}-\d{1,2}-\d{1,2}$/
+    ];
+    
+    const isValidFormat = dateFormats.some(format => format.test(dateStr));
+    if (!isValidFormat) {
+        return {
+            isValid: false,
+            message: 'Định dạng ngày không hợp lệ (dd/mm/yyyy)'
+        };
+    }
+    return { isValid: true };
+}
+
+// Safe element setting with error handling
+function safeSet(elementId, value, options = {}) {
+    try {
+        const element = document.getElementById(elementId);
+        if (!element) {
+            logError(`Element not found: ${elementId}`);
+            return false;
+        }
+
+        // Handle different types of content
+        const displayValue = value || (options.defaultValue || '');
+        
+        if (options.isHTML) {
+            element.innerHTML = displayValue;
+        } else {
+            element.textContent = displayValue;
+        }
+
+        // Apply styling based on validation
+        if (options.isError) {
+            element.className = (element.className || '') + ' error';
+            element.title = options.errorMessage || 'Dữ liệu không hợp lệ';
+        } else if (options.isWarning) {
+            element.className = (element.className || '') + ' warning';
+            element.title = options.warningMessage || 'Cần kiểm tra dữ liệu';
+        }
+
+        return true;
+    } catch (error) {
+        logError(`Failed to set element ${elementId}`, { error, value });
+        return false;
+    }
+}
+
+// Enhanced set function with validation
+function setWithValidation(elementId, value, validator, fieldName) {
+    const validation = validator ? validator(value, fieldName) : { isValid: true };
+    
+    safeSet(elementId, value, {
+        isError: !validation.isValid,
+        errorMessage: validation.message,
+        defaultValue: validation.isValid ? '' : `[${validation.message}]`
+    });
+    
+    if (!validation.isValid) {
+        logError(`Validation failed for ${fieldName}`, validation.message);
+    }
+}
+
+// QR Code generation with error handling
+function generateQRCode(data) {
+    if (!data) {
+        logError('No data provided for QR code generation');
+        return;
+    }
+
+    try {
+        const qrElement = document.getElementById("qrCode");
+        if (!qrElement) {
+            logError('QR code element not found');
+            return;
+        }
+
+        const encodedData = encodeURIComponent(data);
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=${encodedData}`;
+        
+        qrElement.style.backgroundImage = `url('${qrUrl}')`;
+        
+        // Add error handling for failed image load
+        const img = new Image();
+        img.onload = function() {
+            // QR code loaded successfully
+        };
+        img.onerror = function() {
+            logError('Failed to load QR code image');
+            qrElement.style.backgroundColor = '#f0f0f0';
+            qrElement.textContent = 'QR Error';
+        };
+        img.src = qrUrl;
+        
+    } catch (error) {
+        logError('QR code generation failed', error);
+    }
+}
+
+// Main initialization function
+function initializeInvoice() {
+    try {
+        // Collect all form data
+        const formData = {
+            maVanDon: getParam("maVanDon"),
+            maKHGui: getParam("maKHGui"),
+            maBCGui: getParam("maBCGui"),
+            maKHNhan: getParam("maKHNhan"),
+            maBCNhan: getParam("maBCNhan"),
+            tenNguoiGui: getParam("tenNguoiGui"),
+            diaChiNguoiGui: getParam("diaChiNguoiGui"),
+            tenNguoiNhan: getParam("tenNguoiNhan"),
+            diaChiNguoiNhan: getParam("diaChiNguoiNhan"),
+            quanHuyenGui: getParam("quanHuyenGui"),
+            tpGui: getParam("tpGui"),
+            quanHuyenNhan: getParam("quanHuyenNhan"),
+            tpNhan: getParam("tpNhan"),
+            soDTGui: getParam("soDTGui"),
+            tenLHGui: getParam("tenLHGui"),
+            soDTNhan: getParam("soDTNhan"),
+            tenLHNhan: getParam("tenLHNhan"),
+            moTaHang: getParam("moTaHang"),
+            thanhToan: getParam("thanhToan"),
+            cuocChinh: getParam("cuocChinh"),
+            dichVuThem: getParam("dichVuThem"),
+            tongThu: getParam("tongThu"),
+            soKien: getParam("soKien"),
+            tlThuc: getParam("tlThuc"),
+            tlQDoi: getParam("tlQDoi"),
+            thuHo: getParam("thuHo"),
+            khaiGia: getParam("khaiGia"),
+            dichVu: getParam("dichVu"),
+            dichVuNhanh: getParam("dichVuNhanh"),
+            ngayGui: getParam("ngayGui"),
+            ngayNhan: getParam("ngayNhan"),
+            ghiChu: getParam("ghiChu")
+        };
+
+        // Validate and set required fields
+        setWithValidation("maVanDon", formData.maVanDon, validateRequired, "Mã vận đơn");
+        setWithValidation("tenNguoiGui", formData.tenNguoiGui, validateRequired, "Tên người gửi");
+        setWithValidation("tenNguoiNhan", formData.tenNguoiNhan, validateRequired, "Tên người nhận");
+
+        // Set duplicate fields for header
+        safeSet("maVanDonDisplay", formData.maVanDon);
+
+        // Validate and set optional fields with validation
+        setWithValidation("soDTGui", formData.soDTGui, validatePhone, "Số điện thoại người gửi");
+        setWithValidation("soDTNhan", formData.soDTNhan, validatePhone, "Số điện thoại người nhận");
+        setWithValidation("soKien", formData.soKien, validateNumeric, "Số kiện");
+        setWithValidation("tlThuc", formData.tlThuc, validateNumeric, "Trọng lượng thực");
+        setWithValidation("tlQDoi", formData.tlQDoi, validateNumeric, "Trọng lượng quy đổi");
+        setWithValidation("cuocChinh", formData.cuocChinh, validateNumeric, "Cước chính");
+        setWithValidation("tongThu", formData.tongThu, validateNumeric, "Tổng thu");
+        setWithValidation("thuHo", formData.thuHo, validateNumeric, "Thu hộ");
+        setWithValidation("khaiGia", formData.khaiGia, validateNumeric, "Khai giá");
+        setWithValidation("ngayGui", formData.ngayGui, validateDate, "Ngày gửi");
+        setWithValidation("ngayNhan", formData.ngayNhan, validateDate, "Ngày nhận");
+
+        // Set remaining fields without specific validation
+        const simpleFields = [
+            "maKHGui", "maBCGui", "maKHNhan", "maBCNhan",
+            "diaChiNguoiGui", "diaChiNguoiNhan", "quanHuyenGui", "tpGui",
+            "quanHuyenNhan", "tpNhan", "tenLHGui", "tenLHNhan",
+            "moTaHang", "thanhToan", "dichVuThem", "dichVu", 
+            "dichVuNhanh", "ghiChu"
+        ];
+
+        simpleFields.forEach(field => {
+            safeSet(field, formData[field]);
+        });
+
+        // Set the duplicate total field
+        safeSet("tongThu2", formData.tongThu);
+
+        // Generate QR code
+        if (formData.maVanDon) {
+            generateQRCode(formData.maVanDon);
+        }
+
+        // Log successful initialization
+        console.log('ECO Invoice initialized successfully');
+
+    } catch (error) {
+        logError('Failed to initialize invoice', error);
+        showUserError('Có lỗi xảy ra khi tải dữ liệu hóa đơn. Vui lòng thử lại.');
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', initializeInvoice);
+
+// Handle print errors
+window.addEventListener('beforeprint', function() {
+    console.log('Preparing to print invoice...');
+});
+
+window.addEventListener('afterprint', function() {
+    console.log('Print dialog closed');
+});
+
+// Handle page errors
+window.addEventListener('error', function(event) {
+    logError('Page error occurred', {
+        message: event.message,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno
+    });
+});
+
 </script>
 
 </body>
