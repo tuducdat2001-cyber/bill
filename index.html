@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Hóa đơn Vận Tải ECO</title>
+<style>
+    body { font-family: Arial, sans-serif; font-size: 13px; }
+    .invoice {
+        width: 148mm;
+        border: 1px solid #000;
+        padding: 5mm;
+        margin: auto;
+    }
+    table { border-collapse: collapse; width: 100%; }
+    td, th { border: 1px solid #000; padding: 3px; vertical-align: top; }
+    .no-border td { border: none; }
+    .center { text-align: center; }
+    .right { text-align: right; }
+    h1 { margin: 0; font-size: 22px; }
+    h2 { margin: 0; font-size: 18px; }
+    .bold { font-weight: bold; }
+    .qr {
+        width: 60px;
+        height: 60px;
+        background: url('https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=QRCode') no-repeat center/cover;
+    }
+</style>
+</head>
+<body>
+
+<div class="invoice">
+    <table class="no-border">
+        <tr>
+            <td style="width: 60%;">
+                <img src="https://i.imgur.com/W6JkFkx.png" alt="Logo" style="height:40px"><br>
+                <div class="bold">VẬN TẢI ECO</div>
+                VẬN CHUYỂN HÀNG HÓA BẮC NAM<br>
+                Hotline <span class="bold">0946 936 999 - 0888 805 625</span>
+            </td>
+            <td class="right" style="font-size: 20px;">
+                *<span id="maVanDon"></span><br>
+                <span id="maVanDon2" style="font-size:14px;"></span>
+            </td>
+        </tr>
+    </table>
+
+    <table>
+        <tr>
+            <td>Mã KH gửi: <span id="maKHGui"></span></td>
+            <td>Mã BC gửi: <span id="maBCGui"></span></td>
+            <td>Mã KH nhận: <span id="maKHNhan"></span></td>
+            <td>Mã BC nhận: <span id="maBCNhan"></span></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                Tên khách gửi: <span id="tenNguoiGui"></span><br>
+                Địa chỉ: <span id="diaChiNguoiGui"></span>
+            </td>
+            <td colspan="2">
+                Tên khách nhận: <span id="tenNguoiNhan"></span><br>
+                Địa chỉ: <span id="diaChiNguoiNhan"></span>
+            </td>
+        </tr>
+        <tr>
+            <td>Quận/ Huyện: <span id="quanHuyenGui"></span></td>
+            <td>Tỉnh/ TP: <span id="tpGui"></span></td>
+            <td>Quận/ Huyện: <span id="quanHuyenNhan"></span></td>
+            <td>Tỉnh/ TP: <span id="tpNhan"></span></td>
+        </tr>
+        <tr>
+            <td>Số điện thoại: <span id="soDTGui"></span></td>
+            <td>Tên liên hệ: <span id="tenLHGui"></span></td>
+            <td>Số điện thoại: <span id="soDTNhan"></span></td>
+            <td>Tên liên hệ: <span id="tenLHNhan"></span></td>
+        </tr>
+    </table>
+
+    <table>
+        <tr>
+            <td rowspan="2">Số kiện<br><span id="soKien"></span></td>
+            <td rowspan="2">Trọng lượng thực<br><span id="tlThuc"></span></td>
+            <td rowspan="2">Trọng lượng quy đổi<br><span id="tlQDoi"></span></td>
+            <td rowspan="2">Hình thức thanh toán<br><span id="thanhToan"></span></td>
+            <td>Cước chính<br><span id="cuocChinh"></span></td>
+        </tr>
+        <tr>
+            <td>Tổng cước<br><span id="tongThu"></span></td>
+        </tr>
+    </table>
+
+    <table>
+        <tr>
+            <td>Ghi chú</td>
+            <td>Nội dung hàng hóa: <span id="moTaHang"></span></td>
+            <td>Thu hộ: <span id="thuHo"></span></td>
+            <td rowspan="2" class="center bold" style="font-size: 18px;">
+                TỔNG PHẢI THU: <br><span id="tongThu2"></span>
+            </td>
+        </tr>
+        <tr>
+            <td>Khai giá: <span id="khaiGia"></span></td>
+            <td>Ngày giờ gửi: <span id="ngayGui"></span></td>
+            <td>Ngày giờ nhận: <span id="ngayNhan"></span></td>
+        </tr>
+    </table>
+
+    <table>
+        <tr>
+            <td>Dịch vụ: <span id="dichVu"></span></td>
+            <td>D.vụ g.tốc: <span id="dichVuNhanh"></span></td>
+            <td rowspan="2" class="center">
+                <div class="qr" id="qrCode"></div>
+            </td>
+            <td>Mã nhân viên nhận</td>
+            <td>Mã nhân viên phát</td>
+        </tr>
+        <tr>
+            <td colspan="2">Chuyển hoàn <input type="checkbox" id="chuyenHoan"></td>
+            <td>Hủy <input type="checkbox" id="huy"></td>
+        </tr>
+    </table>
+</div>
+
+<p class="center"><button onclick="window.print()">🖨 In hóa đơn</button></p>
+
+<script>
+function getParam(name) {
+    return new URLSearchParams(window.location.search).get(name) || '';
+}
+
+function set(id, val) {
+    document.getElementById(id).innerText = val;
+}
+
+set("maVanDon", getParam("maVanDon"));
+set("maVanDon2", getParam("maVanDon"));
+set("maKHGui", getParam("maKHGui"));
+set("maBCGui", getParam("maBCGui"));
+set("maKHNhan", getParam("maKHNhan"));
+set("maBCNhan", getParam("maBCNhan"));
+set("tenNguoiGui", getParam("tenNguoiGui"));
+set("diaChiNguoiGui", getParam("diaChiNguoiGui"));
+set("tenNguoiNhan", getParam("tenNguoiNhan"));
+set("diaChiNguoiNhan", getParam("diaChiNguoiNhan"));
+set("quanHuyenGui", getParam("quanHuyenGui"));
+set("tpGui", getParam("tpGui"));
+set("quanHuyenNhan", getParam("quanHuyenNhan"));
+set("tpNhan", getParam("tpNhan"));
+set("soDTGui", getParam("soDTGui"));
+set("tenLHGui", getParam("tenLHGui"));
+set("soDTNhan", getParam("soDTNhan"));
+set("tenLHNhan", getParam("tenLHNhan"));
+set("soKien", getParam("soKien"));
+set("tlThuc", getParam("tlThuc"));
+set("tlQDoi", getParam("tlQDoi"));
+set("thanhToan", getParam("thanhToan"));
+set("cuocChinh", getParam("cuocChinh"));
+set("tongThu", getParam("tongThu"));
+set("moTaHang", getParam("moTaHang"));
+set("thuHo", getParam("thuHo"));
+set("tongThu2", getParam("tongThu"));
+set("khaiGia", getParam("khaiGia"));
+set("ngayGui", getParam("ngayGui"));
+set("ngayNhan", getParam("ngayNhan"));
+set("dichVu", getParam("dichVu"));
+set("dichVuNhanh", getParam("dichVuNhanh"));
+
+// QR code tự động
+document.getElementById("qrCode").style.backgroundImage =
+    "url('https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=" + encodeURIComponent(getParam("maVanDon")) + "')";
+</script>
+
+</body>
+</html>
