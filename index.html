@@ -183,6 +183,7 @@
         .side-content .item .label {
             font-weight: bold;
         }
+        /* Fix lỗi hiển thị số tiền bôi đậm không đúng vị trí */
         .side-content .item .value {
             text-align: right;
             border-bottom: 1px dashed #000;
@@ -440,23 +441,23 @@
             </div>
             <div class="item">
                 <span class="label">Cước chính:</span>
-                <span class="value" id="cuocChinh"></span>
+                <span class="value-money" id="cuocChinh"></span>
             </div>
             <div class="item">
                 <span class="label">Dịch vụ cộng thêm:</span>
-                <span class="value" id="dichVuThem"></span>
+                <span class="value-money" id="dichVuThem"></span>
             </div>
             <div class="item">
                 <span class="label">Tổng cước:</span>
-                <span class="value" id="tongCuoc"></span>
+                <span class="value-money" id="tongCuoc"></span>
             </div>
             <div class="total-cost">
                 <span class="label">Thu hộ:</span>
-                <span class="value" id="thuHo"></span>
+                <span class="value-money" id="thuHo"></span>
             </div>
             <div class="total-cost">
                 <span class="label">Tổng phải thu:</span> <!-- Đã xóa "khi phát thư" -->
-                <span class="value" id="tongPhaiThu"></span>
+                <span class="value-money" id="tongPhaiThu"></span>
             </div>
         </div>
     </div>
@@ -535,9 +536,11 @@
 
     // Hàm định dạng tiền tệ (thêm dấu phẩy và làm đậm)
     function formatCurrency(amount) {
-        if (!amount) return '0';
+        // Xóa tất cả các ký tự không phải số
+        const cleanedAmount = String(amount).replace(/\D/g, '');
+        if (!cleanedAmount) return '<b>0</b>';
         // Sử dụng toLocaleString() với 'vi-VN' để tự động phân tách hàng nghìn, triệu
-        const formattedAmount = parseInt(amount).toLocaleString('vi-VN');
+        const formattedAmount = parseInt(cleanedAmount).toLocaleString('vi-VN');
         return `<b>${formattedAmount}</b>`;
     }
 </script>
