@@ -572,6 +572,8 @@
         document.getElementById("tongCuoc").textContent = formatCurrency(getParam("tongCuoc"));
         document.getElementById("thuHo").textContent = formatCurrency(getParam("thuHo"));
         document.getElementById("tongPhaiThu").textContent = formatCurrency(getParam("tongPhaiThu"));
+        // 🚀 Gọi in ngay khi tải xong dữ liệu
+        window.print();
     });
 
     // Hàm định dạng tiền tệ (thêm dấu phẩy)
