@@ -504,13 +504,21 @@
     </div>
 
     <!-- Footer: Dịch vụ và các tùy chọn khác -->
-    <div class="footer">
-        <div class="footer-left">
-            <button class="print-button" onclick="window.print()">🖨 In hóa đơn</button>
+<div class="footer">
+        <div class="qr-note-container">
+            <!-- Mã QR đã được chuyển sang đây -->
+            <img class="qr-code" src="https://tuducdat2001-cyber.github.io/bill/z6886848621829_aea68d7f33a412bd56c8271a3a15fe26.jpg" alt="Mã QR">
+            <!-- Dòng chữ đã được chỉnh sửa -->
+            <p class="qr-note">
+                Quý khách vui lòng quét mã QR để xem<br>
+                Chính sách đền bù và điều kiện chuyển phát
+            </p>
+        </div>
+        <div class="footer-right">
+             <button class="print-button" onclick="window.print()">🖨 In hóa đơn</button>
         </div>
     </div>
 </div>
-
 <script>
     // Hàm lấy giá trị từ URL Parameter
     function getParam(name) {
