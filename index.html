@@ -50,7 +50,7 @@
         
         /* CSS cho logo và QR code trong header */
         .header-left .logo {
-            width: calc(40px * 1.15); /* Tăng kích thước logo */
+            width: calc(40px * 1.15);
             height: calc(40px * 1.15);
             margin-right: calc(5px * 1.15);
         }
@@ -131,7 +131,7 @@
         /* Phần hàng hóa và cước phí */
         .content-section {
             display: grid;
-            grid-template-columns: 1fr 1fr; /* Chia đều hai cột */
+            grid-template-columns: 1fr 1fr;
             border-bottom: 1px solid #000;
             flex-grow: 1;
         }
@@ -142,9 +142,8 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.8rem;
-            table-layout: fixed; /* Đảm bảo các cột có chiều rộng bằng nhau */
+            table-layout: fixed;
         }
-        /* Căn giữa tiêu đề bảng và các giá trị trong bảng */
         .content-table th, .content-table td {
             border: 1px solid #000;
             padding: 3px;
@@ -156,15 +155,12 @@
         .notes-table {
             border-top: 1px solid #000;
         }
-        
-        /* Cập nhật CSS để biến phần ghi chú thành bảng */
         .notes-table table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.8rem;
-            table-layout: fixed; /* Chia đều hai cột */
+            table-layout: fixed;
         }
-        /* Căn giữa tiêu đề bảng và các giá trị trong bảng */
         .notes-table th, .notes-table td {
             border: 1px solid #000;
             padding: 3px;
@@ -177,8 +173,8 @@
 
         .side-content {
             padding: 3px 5px;
-            display: flex; /* Đã thêm để sử dụng flexbox */
-            flex-direction: column; /* Sắp xếp các mục theo chiều dọc */
+            display: flex;
+            flex-direction: column;
         }
         .side-content .item {
             display: flex;
@@ -189,29 +185,21 @@
         .side-content .item .label {
             font-weight: bold;
         }
-        /* Cập nhật CSS để căn đều giá trị */
         .side-content .item .value {
             text-align: right;
             border-bottom: 1px dashed #000;
         }
-
-        /* CSS cho đường phân cách mới */
         .item-separator {
             border-bottom: 1px solid #000;
             margin: 5px 0;
         }
-        
-        /* CSS mới để tăng kích thước số tiền và căn chỉnh */
         .side-content .value-money {
-            font-size: 1.1rem; /* Tăng kích thước phông chữ */
-            font-weight: normal; /* Bỏ in đậm */
+            font-size: 1.1rem;
+            font-weight: normal;
             text-align: right;
-            /* Đã thêm lại đường chấm cho các mục tiền */
             border-bottom: 1px dashed #000;
         }
-
-        /* Thêm margin-top: auto để đẩy các mục số tiền xuống cuối */
-        .side-content .item:nth-of-type(3) { /* Chọn mục "Cước chính" */
+        .side-content .item:nth-of-type(3) {
             margin-top: auto;
         }
         .side-content .total-cost {
@@ -225,10 +213,9 @@
         .side-content .total-cost .label {
             font-weight: bold;
         }
-        /* CSS mới để tăng kích thước và bỏ in đậm cho tổng phải thu */
         .side-content .total-cost .value-money {
-            font-size: 1.3rem; /* Tăng kích thước lớn hơn nữa */
-            font-weight: normal; /* Bỏ in đậm */
+            font-size: 1.3rem;
+            font-weight: normal;
             color: #e74c3c;
         }
         
@@ -267,14 +254,12 @@
             align-items: flex-end;
             margin-top: 10px;
         }
-
         .recipient-signature .employee-label {
             margin-left: auto;
             text-align: right;
             line-height: 1.2;
             padding-left: 10px;
         }
-
 
         /* Footer */
         .footer {
@@ -284,30 +269,23 @@
             margin-top: 5px;
             font-size: 0.8rem;
         }
-        
-        /* Cập nhật lại CSS cho footer để dòng chữ và QR nằm ngang */
         .qr-note-container {
             display: flex;
-            align-items: center; /* Căn giữa các mục theo chiều dọc */
+            align-items: center;
             flex-grow: 1;
         }
-        
-        /* Thêm CSS để mã QR hiển thị đúng */
         .qr-code {
-            width: calc(40px * 1.15); /* Tăng kích thước logo */
+            width: calc(40px * 1.15);
             height: calc(40px * 1.15);
-            margin-right: 5px; /* Điều chỉnh margin để QR sát vào dòng chữ */
+            margin-right: 5px;
         }
-        
-        /* CSS cho dòng chữ mới và mã QR */
         .qr-note {
             margin: 0;
             line-height: 1.2;
             font-size: 0.7rem;
-            white-space: nowrap; /* Ngăn không cho xuống dòng */
-            width: auto; /* Điều chỉnh chiều rộng tự động */
+            white-space: nowrap;
+            width: auto;
         }
-
         .footer-right {
             display: flex;
             flex-direction: column;
@@ -315,7 +293,6 @@
             gap: 5px;
             text-align: right;
         }
-        
         .print-button {
             background-color: #007bff;
             color: white;
@@ -326,49 +303,59 @@
             font-size: 0.9rem;
         }
 
-        /* Thêm CSS để tối ưu hóa cho in khổ giấy A5 ngang */
+        /* --- THAY THẾ TOÀN BỘ KHỐI IN --- */
         @media print {
-            /* Đặt lề in trực tiếp trên trang, không phải trên container */
+            /* Khổ giấy A5 ngang, lề mỏng để tăng vùng in */
             @page {
                 size: A5 landscape;
-                margin: 1cm;
+                margin: 5mm;
             }
 
-            body {
-                background-color: #fff;
-                margin: 0;
-                padding: 0;
+            /* Cố định kích thước trang để trình duyệt canh đúng */
+            html, body {
+                width: 210mm;
+                height: 148mm;
+                margin: 0 !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                background: #fff !important;
             }
 
+            /* Tắt bóng/viền thừa, đặt bề rộng theo vùng in */
             .bill-container {
-                width: auto;
-                height: auto;
-                border: none;
-                box-shadow: none;
-                padding: 0;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
+                box-shadow: none !important;
+                border: 1px solid #000;  /* giữ viền ngoài */
+                width: 200mm;            /* 210mm - 2*5mm lề = 200mm */
+                max-width: 200mm;
+                padding: 5px;            /* giữ padding nhỏ để không tràn */
+                font-size: 1.0em;        /* in gọn hơn 1 chút so với màn hình */
             }
 
-            /* Các phần tử bên trong container sẽ chiếm đủ không gian */
-            .header, .info-section, .content-section, .signature-section, .footer {
-                flex-shrink: 0;
-                flex-grow: 0;
+            /* Thu nhỏ nhẹ để chắc chắn không tràn (chỉnh 0.90–0.95 nếu cần) */
+            .scale-print {
+                transform: scale(1);
+                transform-origin: top left;
             }
-            .content-section {
-                flex-grow: 1;
+
+            /* Chặn ngắt trang giữa các khối chính */
+            .header,
+            .info-section,
+            .content-section,
+            .signature-section,
+            .footer {
+                break-inside: avoid;
+                page-break-inside: avoid;
             }
-            
-            .print-button {
-                display: none;
-            }
+
+            /* Ẩn nút in khi in */
+            .print-button { display: none !important; }
         }
     </style>
 </head>
 <body>
 
-<div class="bill-container">
+<div class="bill-container scale-print">
     <!-- Header: Logo, tên công ty và mã vạch -->
     <div class="header">
         <div class="header-left">
@@ -442,7 +429,6 @@
                 <table>
                     <thead>
                         <tr>
-                            <!-- Đã đổi vị trí Số kiện và Trọng lượng và thêm cột Thể tích -->
                             <th>Dịch vụ</th>
                             <th>Số kiện</th>
                             <th>Trọng lượng</th>
@@ -451,7 +437,6 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <!-- Cập nhật các td tương ứng -->
                             <td id="dichVuTrongBang"></td>
                             <td id="soKien"></td>
                             <td id="tlThuc"></td>
@@ -464,14 +449,12 @@
                 <table>
                     <thead>
                         <tr>
-                             <!-- Đã đổi vị trí Ghi chú và Nội dung hàng hóa -->
                             <th>Nội dung hàng hoá</th>
                             <th>Ghi chú</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                             <!-- Đã đổi vị trí td tương ứng -->
                             <td id="noiDungHangHoa"></td>
                             <td id="ghiChu"></td>
                         </tr>
@@ -484,7 +467,7 @@
                 <span class="label">Hình thức thanh toán:</span>
                 <span class="value" id="thanhToan"></span>
             </div>
-            <div class="item-separator"></div> <!-- Đường phân cách mới -->
+            <div class="item-separator"></div>
             <div class="item">
                 <span class="label">Cước chính:</span>
                 <span class="value-money" id="cuocChinh"></span>
@@ -502,7 +485,7 @@
                 <span class="value-money" id="thuHo"></span>
             </div>
             <div class="total-cost">
-                <span class="label">Tổng phải thu:</span> <!-- Đã xóa "khi phát thư" -->
+                <span class="label">Tổng phải thu:</span>
                 <span class="value-money" id="tongPhaiThu"></span>
             </div>
         </div>
@@ -511,25 +494,23 @@
     <!-- Phần chữ ký -->
     <div class="signature-section">
         <div class="signature-box border-right">
-            <p class="date-time">Ngày giờ gửi . . . . . . . . . . . . . . . . . . . . . .</p>
+            <p class="date-time">Ngày giờ gửi: <span id="ngayGioGui"></span></p>
             <p>Họ tên và chữ ký người gửi</p>
         </div>
         <div class="signature-box border-right">
             <p class="date-time">Ngày giờ nhận . . . . . . . . . . . . . . . . . . . .</p>
-            <p>Họ tên và chữ ký người nhận</p>
+            <p>Nhân viên nhận ký</p>
         </div>
         <div class="signature-box">
             <p class="date-time">Ngày giờ nhận . . . . . . . . . . . . . . . . . .  . .</p>
-            <p>Nhân viên nhận ký</p>
+            <p>Họ tên và chữ ký người nhận</p>
         </div>
     </div>
 
     <!-- Footer: Dịch vụ và các tùy chọn khác -->
     <div class="footer">
         <div class="qr-note-container">
-            <!-- Mã QR đã được chuyển sang đây -->
             <img class="qr-code" src="https://tuducdat2001-cyber.github.io/bill/z6886848621829_aea68d7f33a412bd56c8271a3a15fe26.jpg" alt="Mã QR">
-            <!-- Dòng chữ đã được chỉnh sửa -->
             <p class="qr-note">
                 Quý khách vui lòng quét mã QR để xem<br>
                 Chính sách đền bù và điều kiện chuyển phát
@@ -572,13 +553,12 @@
         document.getElementById("xaPhuongNhan").textContent = getParam("xaPhuongNhan");
         document.getElementById("tinhTPNhan").textContent = getParam("tinhTPNhan");
         document.getElementById("sdtNguoiNhan").textContent = getParam("sdtNguoiNhan");
+        document.getElementById("ngayGioGui").textContent = getParam("ngayGioGui");
         
         // Cập nhật thông tin hàng hóa
         document.getElementById("soKien").textContent = getParam("soKien");
-        // Thêm đơn vị kg vào sau giá trị
         const tlThucValue = getParam("tlThuc");
         document.getElementById("tlThuc").textContent = tlThucValue ? `${tlThucValue} kg` : '';
-        // Thêm đơn vị m³ vào sau giá trị thể tích
         const thetichValue = getParam("thetich");
         document.getElementById("thetich").textContent = thetichValue ? `${thetichValue} m³` : '';
         document.getElementById("dichVuTrongBang").textContent = getParam("dichVu");
@@ -596,11 +576,9 @@
 
     // Hàm định dạng tiền tệ (thêm dấu phẩy)
     function formatCurrency(amount) {
-        // Xóa tất cả các ký tự không phải số
         const cleanedAmount = String(amount).replace(/\D/g, '');
         if (!cleanedAmount) return '0';
-        // Sử dụng toLocaleString() với 'vi-VN' để tự động phân tách hàng nghìn, triệu
-        return parseInt(cleanedAmount).toLocaleString('vi-VN');
+        return parseInt(cleanedAmount, 10).toLocaleString('vi-VN');
     }
 </script>
 
