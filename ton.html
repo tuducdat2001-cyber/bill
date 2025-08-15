@@ -1,244 +1,208 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Báo cáo Bill còn thiếu</title>
-  <style>
-    :root { --c-border:#d0d7de; --c-text:#111827; --c-muted:#6b7280; --c-bg:#ffffff; --c-soft:#f9fafb; }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans","Liberation Sans",sans-serif; color:var(--c-text); background:var(--c-soft); }
-    .page { max-width:1200px; margin:24px auto; padding:16px; }
-    .card { background:var(--c-bg); border:1px solid var(--c-border); border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,.04); padding:16px; }
-    .header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
-    .title { font-size:20px; font-weight:700; letter-spacing:.2px; }
-    .actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-    button, input[type="search"], select {
-      border:1px solid var(--c-border); background:#fff; padding:8px 12px; border-radius:999px;
-    }
-    button { cursor:pointer; font-weight:600; }
-    button:hover { background:#f3f4f6; }
-    input[type="search"] { border-radius:10px; min-width:200px; }
-    .stats { display:flex; gap:16px; flex-wrap:wrap; margin:8px 0 12px; color:var(--c-muted); }
-    .table-wrap { margin-top:8px; overflow:auto; background:#fff; border:1px solid var(--c-border); border-radius:16px; }
-    table { border-collapse:collapse; width:100%; min-width:1000px; }
-    thead th { position:sticky; top:0; background:#f3f4f6; z-index:1; text-align:left; padding:10px; font-size:13px; border-bottom:1px solid var(--c-border); }
-    tbody td { padding:8px 10px; border-bottom:1px solid #f0f0f0; vertical-align:top; font-size:14px; }
-    tfoot td { padding:10px; font-weight:700; background:#fafafa; border-top:1px solid var(--c-border); }
-    .empty { padding:16px; text-align:center; color:var(--c-muted); }
-    .loading { padding:16px; text-align:center; color:var(--c-muted); }
-    @media print {
-      body { background:#fff; }
-      .page { margin:0; padding:0; }
-      .card { border:none; box-shadow:none; border-radius:0; }
-      .actions { display:none; }
-      @page { size:A4 landscape; margin:10mm; }
-      thead th { background:#eee !important; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm tra đơn hàng chưa xếp đủ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #d9534f;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .warning {
+            background-color: #fff3cd !important;
+        }
+        .loading {
+            color: #31708f;
+            font-style: italic;
+        }
+        .error {
+            color: #d9534f;
+        }
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 10px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .container {
+            overflow-x: auto;
+        }
+    </style>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-  <div class="page">
-    <div class="card">
-      <div class="header">
-        <div class="title">BÁO CÁO BILL CÒN THIẾU</div>
-        <div class="actions">
-          <input id="q" type="search" placeholder="Tìm Bill/khách hàng/địa điểm..." />
-          <select id="status">
-            <option value="">— Tất cả trạng thái —</option>
-            <option value="Chưa xếp">Chưa xếp</option>
-            <option value="Thiếu (chưa đủ)">Thiếu (chưa đủ)</option>
-          </select>
-          <button type="button" onclick="window.print()">In</button>
-          <button type="button" onclick="downloadJSON()">Tải JSON</button>
-          <button type="button" onclick="downloadCSV()">Tải CSV</button>
-        </div>
-      </div>
-
-      <div class="stats" id="stats"></div>
-
-      <div id="loading" class="loading">Đang tải dữ liệu...</div>
-
-      <div class="table-wrap" style="display:none" id="wrap">
-        <table id="tbl">
-          <thead>
-            <tr>
-              <th>Bill</th>
-              <th>Khách hàng</th>
-              <th>Tên mặt hàng</th>
-              <th>Số kiện (Bill)</th>
-              <th>Đã xếp (Xếp hàng)</th>
-              <th>Còn thiếu</th>
-              <th>Trạng thái thiếu</th>
-              <th>Tỉnh trả</th>
-              <th>Xã trả</th>
-              <th>Nơi trả</th>
-              <th>Ngày (Bill)</th>
-              <th>Ghi chú</th>
-            </tr>
-          </thead>
-          <tbody id="body"></tbody>
-          <tfoot>
-            <tr>
-              <td colspan="3">Tổng</td>
-              <td id="sum-bill">0</td>
-              <td id="sum-shipped">0</td>
-              <td id="sum-missing">0</td>
-              <td colspan="6"></td>
-            </tr>
-          </tfoot>
+    <h1>Đơn hàng chưa xếp đủ số kiện</h1>
+    <button id="exportBtn" class="button" style="display: none;">Xuất Excel</button>
+    <div id="status" class="loading">Đang tải dữ liệu...</div>
+    <div class="container">
+        <table id="resultTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Ngày bốc hàng</th>
+                    <th>Tỉnh nhận</th>
+                    <th>Khách hàng</th>
+                    <th>Chưa giao</th>
+                    <th>Điểm đến</th>
+                    <th>Người nhận</th>
+                    <th>Địa chỉ nhận</th>
+                    <th>SĐT nhận</th>
+                    <th>Số Bill</th>
+                    <th>Trọng lượng chưa xếp</th>
+                    <th>Thể tích chưa xếp</th>
+                    <th>Số kiện (Bill)</th>
+                    <th>Tổng số kiện đã xếp</th>
+                </tr>
+            </thead>
+            <tbody id="billTable">
+                <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
+            </tbody>
         </table>
-        <div id="empty" class="empty" style="display:none">Không có Bill còn thiếu.</div>
-      </div>
     </div>
-  </div>
 
-  <script>
-    // ==== Điền URL Web App của bạn tại đây ====
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxnxlFyYsoBJ7hw4fsXeGJwWgyuRWybLIdQS9HC5-0At5lritB1DvTz8BNj0Be2mcu1/exec';
-
-    // ==== State ====
-    let PAYLOAD = { missing: [], stats: {} };
-    let VIEW = []; // hàng sau khi lọc tìm kiếm/trạng thái
-
-    const $ = (id) => document.getElementById(id);
-    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    const num = (v) => { const n = Number(v ?? 0); return isFinite(n) ? n : 0; };
-
-    // ==== Render ====
-    function render() {
-      const wrap = $('wrap'), loading = $('loading'), body = $('body'), empty = $('empty');
-      loading.style.display = 'none';
-      wrap.style.display = 'block';
-      body.innerHTML = '';
-
-      const rows = VIEW.length ? VIEW : (PAYLOAD.missing || []);
-      if (!rows.length) {
-        empty.style.display = 'block';
-        $('sum-bill').textContent = '0';
-        $('sum-shipped').textContent = '0';
-        $('sum-missing').textContent = '0';
-        $('stats').textContent = '';
-        return;
-      } else {
-        empty.style.display = 'none';
-      }
-
-      let sumBill = 0, sumShipped = 0, sumMissing = 0;
-
-      rows.forEach(r => {
-        sumBill    += num(r['Số kiện (Bill)']);
-        sumShipped += num(r['Đã xếp (Xếp hàng)']);
-        sumMissing += num(r['Còn thiếu']);
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${esc(r['Bill'])}</td>
-          <td>${esc(r['Khách hàng'])}</td>
-          <td>${esc(r['Tên mặt hàng'])}</td>
-          <td>${num(r['Số kiện (Bill)'])}</td>
-          <td>${num(r['Đã xếp (Xếp hàng)'])}</td>
-          <td><b>${num(r['Còn thiếu'])}</b></td>
-          <td>${esc(r['Trạng thái thiếu'])}</td>
-          <td>${esc(r['Tỉnh trả'])}</td>
-          <td>${esc(r['Xã trả'])}</td>
-          <td>${esc(r['Nơi trả'])}</td>
-          <td>${esc(r['Ngày (Bill)'])}</td>
-          <td>${esc(r['Ghi chú'])}</td>
-        `;
-        body.appendChild(tr);
-      });
-
-      $('sum-bill').textContent    = String(sumBill);
-      $('sum-shipped').textContent = String(sumShipped);
-      $('sum-missing').textContent = String(sumMissing);
-
-      const st = PAYLOAD.stats || {};
-      $('stats').innerHTML = `
-        <div>Tổng Bill: <b>${st.nBill ?? '-'}</b></div>
-        <div>Dòng Xếp hàng: <b>${st.nXH ?? '-'}</b></div>
-        <div>Bill còn thiếu: <b>${st.nMissing ?? rows.length}</b></div>
-        <div>Chưa xếp: <b>${st.nNotPlaced ?? '-'}</b></div>
-        <div>Tổng Số kiện (Bill): <b>${st.sumBill ?? sumBill}</b></div>
-        <div>Đã xếp: <b>${st.sumShipped ?? sumShipped}</b></div>
-        <div>Còn thiếu: <b>${st.sumMissing ?? sumMissing}</b></div>
-      `;
-    }
-
-    // ==== Tìm kiếm & lọc ====
-    function applyFilters() {
-      const q = ($('q').value || '').toLowerCase().trim();
-      const st = $('status').value || '';
-
-      const base = PAYLOAD.missing || [];
-      VIEW = base.filter(r => {
-        const okStatus = !st || r['Trạng thái thiếu'] === st;
-        if (!okStatus) return false;
-        if (!q) return true;
-        // tìm trên vài cột chính
-        const hay = [
-          r['Bill'], r['Khách hàng'], r['Tên mặt hàng'],
-          r['Tỉnh trả'], r['Xã trả'], r['Nơi trả'], r['Ghi chú']
-        ].map(x => String(x || '').toLowerCase());
-        return hay.some(x => x.includes(q));
-      });
-      render();
-    }
-    $('q').addEventListener('input', applyFilters);
-    $('status').addEventListener('change', applyFilters);
-
-    // ==== Tải JSON/CSV ====
-    function downloadJSON() {
-      const blob = new Blob([JSON.stringify(PAYLOAD, null, 2)], {type: "application/json"});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'bill_con_thieu.json'; a.click();
-      URL.revokeObjectURL(url);
-    }
-    function downloadCSV() {
-      const cols = ['Bill','Khách hàng','Tên mặt hàng','Số kiện (Bill)','Đã xếp (Xếp hàng)','Còn thiếu','Trạng thái thiếu','Tỉnh trả','Xã trả','Nơi trả','Ngày (Bill)','Ghi chú'];
-      const rows = VIEW.length ? VIEW : (PAYLOAD.missing || []);
-      const lines = [cols.join(',')];
-      rows.forEach(r => {
-        const line = cols.map(c => {
-          const v = r[c] ?? '';
-          const s = String(v).replace(/"/g,'""');
-          return /[",\n]/.test(s) ? `"${s}"` : s;
-        }).join(',');
-        lines.push(line);
-      });
-      const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'bill_con_thieu.csv'; a.click();
-      URL.revokeObjectURL(url);
-    }
-    window.downloadJSON = downloadJSON;
-    window.downloadCSV = downloadCSV;
-
-    // ==== Nhận JSONP từ Apps Script ====
-    function loadDataJSONP() {
-      const s = document.createElement('script');
-      const cb = '__onPayload_' + Math.random().toString(36).slice(2);
-      window[cb] = function (payload) {
-        try {
-          PAYLOAD = payload || {missing:[], stats:{}};
-          VIEW = []; // reset filter
-          applyFilters(); // render lần đầu
-        } finally {
-          delete window[cb];
-          s.remove();
+    <script>
+        // URL API của bạn
+        const API_URL = "https://script.google.com/macros/s/AKfycbwbiLYAy1-FvBceJ0ir1XqJ9yzu-SEkhp6UT4uHTKGpGDNXIHMuhvkWca0Kz1HzLIqF/exec?all=1";
+        
+        // Hiển thị trạng thái
+        function showStatus(message, isError = false) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = isError ? 'error' : 'loading';
         }
-      };
-      s.src = GAS_URL + '?format=jsonp&callback=' + cb;
-      s.onerror = () => {
-        $('loading').textContent = 'Lỗi tải dữ liệu. Kiểm tra URL Web App hoặc quyền truy cập.';
-      };
-      document.head.appendChild(s);
-    }
 
-    // Kick off
-    loadDataJSONP();
-  </script>
+        // Lấy dữ liệu từ API
+        async function fetchData() {
+            showStatus('Đang tải dữ liệu...');
+            
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    throw new Error(`Lỗi HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Kiểm tra cấu trúc dữ liệu
+                if (!data.data || !data.data.Bill || !data.data["Xếp hàng"]) {
+                    throw new Error('Dữ liệu không đúng định dạng');
+                }
+                
+                processData(data.data);
+            } catch (error) {
+                showStatus('Lỗi khi tải dữ liệu: ' + error.message, true);
+                console.error('Lỗi:', error);
+            }
+        }
+
+        // Xử lý dữ liệu
+        function processData(data) {
+            // Tính tổng số kiện đã xếp cho từng bill
+            const xepHangSummary = {};
+            data["Xếp hàng"].forEach(item => {
+                if (!xepHangSummary[item.bill]) {
+                    xepHangSummary[item.bill] = 0;
+                }
+                xepHangSummary[item.bill] += parseInt(item.so_kien) || 0;
+            });
+
+            // Tìm các bill có số kiện > tổng số kiện đã xếp
+            const billsWithIncompletePacking = data.Bill.filter(bill => {
+                const billKien = parseInt(bill.so_kien) || 0;
+                const totalPacked = xepHangSummary[bill.so_bill] || 0;
+                return billKien > totalPacked;
+            });
+
+            // Hiển thị kết quả
+            const tableBody = document.getElementById('billTable');
+            tableBody.innerHTML = ''; // Xóa nội dung cũ
+            
+            if (billsWithIncompletePacking.length === 0) {
+                showStatus('Tất cả đơn hàng đã được xếp đủ số kiện');
+                return;
+            }
+
+            // Hiển thị bảng kết quả
+            document.getElementById('resultTable').style.display = 'table';
+            document.getElementById('exportBtn').style.display = 'inline-block';
+            showStatus(`Tìm thấy ${billsWithIncompletePacking.length} đơn hàng chưa xếp đủ`);
+
+            billsWithIncompletePacking.forEach((bill, index) => {
+                const billKien = parseInt(bill.so_kien) || 0;
+                const totalPacked = xepHangSummary[bill.so_bill] || 0;
+                const diff = billKien - totalPacked;
+                
+                // Tính trọng lượng và thể tích chưa xếp (tính bằng đơn vị thực tế)
+                const tlBill = parseFloat(bill.trong_luong_thuc) || 0;
+                const ttBill = parseFloat(bill.the_tich) || 0;
+                const ratioPacked = totalPacked / billKien;
+                
+                const tlUnpacked = tlBill * (1 - ratioPacked);
+                const ttUnpacked = ttBill * (1 - ratioPacked);
+                
+                const row = document.createElement('tr');
+                if (diff > 0) {
+                    row.classList.add('warning');
+                }
+                
+                row.innerHTML = `
+                    <td></td>
+                    <td>${bill.ngay_boc || ''}</td>
+                    <td>${bill.tinh_nhan || ''}</td>
+                    <td>${bill.ten_khach_gui || ''}</td>
+                    <td>${diff}</td>
+                    <td>${bill.tinh_nhan || ''}</td>
+                    <td>${bill.ten_khach_nhan || ''}</td>
+                    <td>${bill.ia_chi_nhan || ''}</td>
+                    <td>${bill.st_khach_nhan || ''}</td>
+                    <td>${bill.so_bill}</td>
+                    <td>${tlUnpacked.toFixed(2)}</td>
+                    <td>${ttUnpacked.toFixed(2)}</td>
+                    <td>${billKien}</td>
+                    <td>${totalPacked}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Xuất Excel
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            const table = document.getElementById('resultTable');
+            const workbook = XLSX.utils.table_to_book(table);
+            XLSX.writeFile(workbook, 'Don_hang_chua_xep_du.xlsx');
+        });
+
+        // Gọi hàm lấy dữ liệu khi trang được tải
+        window.onload = fetchData;
+    </script>
 </body>
 </html>
