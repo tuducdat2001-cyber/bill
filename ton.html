@@ -5,118 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý đơn hàng vận chuyển</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h1 {
-            color: #d9534f;
-            text-align: center;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-            font-size: 12px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-            position: sticky;
-            top: 0;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        .warning {
-            background-color: #fff3cd !important;
-        }
-        .loading {
-            color: #31708f;
-            font-style: italic;
-        }
-        .error {
-            color: #d9534f;
-        }
-        .button {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 10px 15px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            margin: 10px 2px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .button.print {
-            background-color: #337ab7;
-        }
-        .button.edit {
-            background-color: #f0ad4e;
-        }
-        .container {
-            overflow-x: auto;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 800px;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: inline-block;
-            width: 150px;
-            font-weight: bold;
-        }
-        .form-group input, .form-group select {
-            width: 200px;
-            padding: 5px;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #d9534f; text-align: center; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; font-size: 12px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; position: sticky; top: 0; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .warning { background-color: #fff3cd !important; }
+        .loading { color: #31708f; font-style: italic; }
+        .error { color: #d9534f; }
+        .button { background-color: #4CAF50; border: none; color: white; padding: 10px 15px; text-align: center; text-decoration: none; display: inline-block; font-size: 14px; margin: 10px 2px; cursor: pointer; border-radius: 4px; }
+        .button.print { background-color: #337ab7; }
+        .button.edit { background-color: #f0ad4e; }
+        .container { overflow-x: auto; }
+        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 800px; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: inline-block; width: 150px; font-weight: bold; }
+        .form-group input, .form-group select { width: 200px; padding: 5px; }
         @media print {
-            body {
-                margin: 0;
-                padding: 10px;
-            }
-            .no-print {
-                display: none !important;
-            }
-            table {
-                font-size: 10px;
-                width: 100%;
-            }
-            th, td {
-                padding: 5px;
-            }
+            body { margin: 0; padding: 10px; }
+            .no-print { display: none !important; }
+            table { font-size: 10px; width: 100%; }
+            th, td { padding: 5px; }
         }
     </style>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
@@ -150,331 +62,152 @@
                     <th>Tổng số kiện đã xếp</th>
                 </tr>
             </thead>
-            <tbody id="billTable">
-                <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
-            </tbody>
+            <tbody id="billTable"></tbody>
         </table>
     </div>
 
-    <!-- Modal chỉnh sửa dữ liệu -->
+    <!-- Modal chỉnh sửa -->
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Chỉnh sửa thông tin đơn hàng</h2>
             <form id="editForm">
-                <div class="form-group">
-                    <label for="editBillNumber">Số Bill:</label>
-                    <input type="text" id="editBillNumber" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="editCustomer">Khách hàng:</label>
-                    <input type="text" id="editCustomer">
-                </div>
-                <div class="form-group">
-                    <label for="editService">Dịch vụ GTGT:</label>
-                    <input type="text" id="editService">
-                </div>
-                <div class="form-group">
-                    <label for="editContent">Nội dung hàng:</label>
-                    <input type="text" id="editContent">
-                </div>
-                <div class="form-group">
-                    <label for="editCOD">COD:</label>
-                    <input type="text" id="editCOD">
-                </div>
-                <div class="form-group">
-                    <label for="editPhone">SĐT nhận:</label>
-                    <input type="text" id="editPhone">
-                </div>
-                <div class="form-group">
-                    <label for="editAddress">Địa chỉ nhận:</label>
-                    <input type="text" id="editAddress">
-                </div>
-                <div class="form-group">
-                    <label for="editWeight">Trọng lượng chưa xếp:</label>
-                    <input type="number" step="0.01" id="editWeight">
-                </div>
-                <div class="form-group">
-                    <label for="editVolume">Thể tích chưa xếp:</label>
-                    <input type="number" step="0.01" id="editVolume">
-                </div>
-                <div class="form-group">
-                    <label for="editPacked">Tổng số kiện đã xếp:</label>
-                    <input type="number" id="editPacked">
-                </div>
+                <div class="form-group"><label for="editBillNumber">Số Bill:</label><input type="text" id="editBillNumber" readonly></div>
+                <div class="form-group"><label for="editCustomer">Khách hàng:</label><input type="text" id="editCustomer"></div>
+                <div class="form-group"><label for="editService">Dịch vụ GTGT:</label><input type="text" id="editService"></div>
+                <div class="form-group"><label for="editContent">Nội dung hàng:</label><input type="text" id="editContent"></div>
+                <div class="form-group"><label for="editCOD">COD:</label><input type="text" id="editCOD"></div>
+                <div class="form-group"><label for="editPhone">SĐT nhận:</label><input type="text" id="editPhone"></div>
+                <div class="form-group"><label for="editAddress">Địa chỉ nhận:</label><input type="text" id="editAddress"></div>
+                <div class="form-group"><label for="editWeight">Trọng lượng chưa xếp:</label><input type="number" step="0.01" id="editWeight"></div>
+                <div class="form-group"><label for="editVolume">Thể tích chưa xếp:</label><input type="number" step="0.01" id="editVolume"></div>
+                <div class="form-group"><label for="editPacked">Tổng số kiện đã xếp:</label><input type="number" id="editPacked"></div>
                 <button type="submit" class="button">Lưu thay đổi</button>
             </form>
         </div>
     </div>
 
     <script>
-        // URL API của bạn
         const API_URL = "https://script.google.com/macros/s/AKfycbwbiLYAy1-FvBceJ0ir1XqJ9yzu-SEkhp6UT4uHTKGpGDNXIHMuhvkWca0Kz1HzLIqF/exec?all=1";
         let currentData = {};
-        
-        // Hiển thị trạng thái
-        function showStatus(message, isError = false) {
-            const statusEl = document.getElementById('status');
-            statusEl.textContent = message;
-            statusEl.className = isError ? 'error' : 'loading';
-        }
+        const priorityMap = {};
+        const normalizeProvince = s => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const getPriority = tinh => priorityMap[normalizeProvince(tinh)] ?? 0;
+        const parseVnDate = s => { const p = (s || "").split("/"); return p.length===3 ? new Date(+p[2], p[1]-1, +p[0]) : new Date(s); };
+        function showStatus(msg, err=false){const el=document.getElementById('status');el.textContent=msg;el.className=err?'error':'loading';}
 
-        // Lấy dữ liệu từ API
-        async function fetchData() {
+        async function fetchData(){
             showStatus('Đang tải dữ liệu...');
-            
-            try {
-                const response = await fetch(API_URL);
-                if (!response.ok) {
-                    throw new Error(`Lỗi HTTP: ${response.status}`);
+            try{
+                const res=await fetch(API_URL);
+                if(!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data=await res.json();
+                if(!data.data || !data.data.Bill) throw new Error('Sai cấu trúc dữ liệu');
+                currentData=data.data;
+                if(Array.isArray(currentData["Phụ"])){
+                    currentData["Phụ"].forEach(r=>priorityMap[normalizeProvince(r.tinh)]=parseInt(r.uu_tien)||0);
                 }
-                
-                const data = await response.json();
-                
-                // Kiểm tra cấu trúc dữ liệu
-                if (!data.data || !data.data.Bill || !data.data["Xếp hàng"]) {
-                    throw new Error('Dữ liệu không đúng định dạng');
-                }
-                
-                currentData = data.data;
                 processData(currentData);
-            } catch (error) {
-                showStatus('Lỗi khi tải dữ liệu: ' + error.message, true);
-                console.error('Lỗi:', error);
-            }
+            }catch(e){showStatus('Lỗi: '+e.message,true);}
         }
 
-        // Xử lý dữ liệu
-        function processData(data) {
-            // Tính tổng số kiện đã xếp cho từng bill
-            const xepHangSummary = {};
-            data["Xếp hàng"].forEach(item => {
-                if (!xepHangSummary[item.bill]) {
-                    xepHangSummary[item.bill] = 0;
-                }
-                xepHangSummary[item.bill] += parseInt(item.so_kien) || 0;
+        function processData(data){
+            const sumPacked={};
+            data["Xếp hàng"].forEach(i=>sumPacked[i.bill]=(sumPacked[i.bill]||0)+(parseInt(i.so_kien)||0));
+            let bills=data.Bill.filter(b=>(parseInt(b.so_kien)||0)>(sumPacked[b.so_bill]||0));
+            bills.sort((a,b)=>{
+                const pa=getPriority(a.tinh_nhan), pb=getPriority(b.tinh_nhan);
+                if(pa===0 && pb===0) return parseVnDate(b.ngay_boc)-parseVnDate(a.ngay_boc);
+                if(pa===0) return 1; if(pb===0) return -1;
+                return pa!==pb ? pa-pb : parseVnDate(b.ngay_boc)-parseVnDate(a.ngay_boc);
             });
-
-            // Tìm các bill có số kiện > tổng số kiện đã xếp
-            const billsWithIncompletePacking = data.Bill.filter(bill => {
-                const billKien = parseInt(bill.so_kien) || 0;
-                const totalPacked = xepHangSummary[bill.so_bill] || 0;
-                return billKien > totalPacked;
-            });
-
-            // Sắp xếp theo ngày bốc hàng (mới nhất lên đầu)
-            billsWithIncompletePacking.sort((a, b) => {
-                return new Date(b.ngay_boc) - new Date(a.ngay_boc);
-            });
-
-            // Hiển thị kết quả
-            const tableBody = document.getElementById('billTable');
-            tableBody.innerHTML = ''; // Xóa nội dung cũ
-            
-            if (billsWithIncompletePacking.length === 0) {
-                showStatus('Tất cả đơn hàng đã được xếp đủ số kiện');
-                return;
-            }
-
-            // Hiển thị bảng kết quả
-            document.getElementById('resultTable').style.display = 'table';
-            document.getElementById('exportBtn').style.display = 'inline-block';
-            document.getElementById('printBtn').style.display = 'inline-block';
-            document.getElementById('editBtn').style.display = 'inline-block';
-            showStatus(`Tìm thấy ${billsWithIncompletePacking.length} đơn hàng chưa xếp đủ`);
-
-            billsWithIncompletePacking.forEach((bill, index) => {
-                const billKien = parseInt(bill.so_kien) || 0;
-                const totalPacked = xepHangSummary[bill.so_bill] || 0;
-                const diff = billKien - totalPacked;
-                
-                // Tính trọng lượng và thể tích chưa xếp (tính bằng đơn vị thực tế)
-                const tlBill = parseFloat(bill.trong_luong_thuc) || 0;
-                const ttBill = parseFloat(bill.the_tich) || 0;
-                const ratioPacked = totalPacked / billKien;
-                
-                const tlUnpacked = tlBill * (1 - ratioPacked);
-                const ttUnpacked = ttBill * (1 - ratioPacked);
-                
-                const row = document.createElement('tr');
-                if (diff > 0) {
-                    row.classList.add('warning');
-                }
-                
-                row.innerHTML = `
-                    <td class="stt"></td>
-                    <td>${bill.ngay_boc || ''}</td>
-                    <td>${bill.tinh_nhan || ''}</td>
-                    <td>${bill.ten_khach_gui || ''}</td>
-                    <td>${bill.dich_vu_gtgt || ''}</td>
-                    <td>${bill.noi_dung_hang_hoa || ''}</td>
-                    <td>${diff} kiện</td>
-                    <td>${bill.cod || ''}</td>
-                    <td>${bill.st_khach_nhan || ''}</td>
-                    <td>${bill.ia_chi_nhan || ''}</td>
-                    <td>${bill.so_bill}</td>
-                    <td>${tlUnpacked.toFixed(2)}</td>
-                    <td>${ttUnpacked.toFixed(2)}</td>
-                    <td>${billKien}</td>
-                    <td>${totalPacked}</td>
-                `;
-                
-                // Thêm sự kiện click để chỉnh sửa
-                row.addEventListener('click', function() {
-                    openEditModal(bill, xepHangSummary[bill.so_bill] || 0, tlUnpacked, ttUnpacked);
-                });
-                
-                tableBody.appendChild(row);
+            const tb=document.getElementById('billTable');tb.innerHTML='';
+            if(!bills.length){showStatus('Tất cả đơn hàng đã xếp đủ');return;}
+            document.getElementById('resultTable').style.display='table';
+            document.getElementById('exportBtn').style.display='inline-block';
+            document.getElementById('printBtn').style.display='inline-block';
+            document.getElementById('editBtn').style.display='inline-block';
+            showStatus(`Tìm thấy ${bills.length} đơn hàng chưa xếp đủ`);
+            bills.forEach((b,i)=>{
+                const billKien=parseInt(b.so_kien)||0, packed=sumPacked[b.so_bill]||0, diff=billKien-packed;
+                const tlUn=(parseFloat(b.trong_luong_thuc)||0)*(1-(billKien?packed/billKien:0));
+                const ttUn=(parseFloat(b.the_tich)||0)*(1-(billKien?packed/billKien:0));
+                const tr=document.createElement('tr'); if(diff>0) tr.classList.add('warning');
+                tr.innerHTML=`<td></td><td>${b.ngay_boc||''}</td><td>${b.tinh_nhan||''}</td><td>${b.ten_khach_gui||''}</td>
+                    <td>${b.dich_vu_gtgt||''}</td><td>${b.noi_dung_hang_hoa||''}</td><td>${diff} kiện</td><td>${b.cod||''}</td>
+                    <td>${b.st_khach_nhan||''}</td><td>${b.ia_chi_nhan||''}</td><td>${b.so_bill}</td>
+                    <td>${tlUn.toFixed(2)}</td><td>${ttUn.toFixed(2)}</td><td>${billKien}</td><td>${packed}</td>`;
+                tr.addEventListener('click',()=>openEditModal(b,packed,tlUn,ttUn));
+                tb.appendChild(tr);
             });
         }
 
-        // Mở modal chỉnh sửa
-        function openEditModal(bill, packedCount, weight, volume) {
-            const modal = document.getElementById('editModal');
-            const form = document.getElementById('editForm');
-            
-            document.getElementById('editBillNumber').value = bill.so_bill;
-            document.getElementById('editCustomer').value = bill.ten_khach_gui || '';
-            document.getElementById('editService').value = bill.dich_vu_gtgt || '';
-            document.getElementById('editContent').value = bill.noi_dung_hang_hoa || '';
-            document.getElementById('editCOD').value = bill.cod || '';
-            document.getElementById('editPhone').value = bill.st_khach_nhan || '';
-            document.getElementById('editAddress').value = bill.ia_chi_nhan || '';
-            document.getElementById('editWeight').value = weight.toFixed(2);
-            document.getElementById('editVolume').value = volume.toFixed(2);
-            document.getElementById('editPacked').value = packedCount;
-            
-            modal.style.display = 'block';
-            
-            // Đóng modal khi click vào nút đóng
-            document.querySelector('.close').onclick = function() {
-                modal.style.display = 'none';
-            }
-            
-            // Đóng modal khi click bên ngoài
-            window.onclick = function(event) {
-                if (event.target == modal) {
-                    modal.style.display = 'none';
-                }
-            }
+        function openEditModal(bill, packed, w, v){
+            const m=document.getElementById('editModal');
+            document.getElementById('editBillNumber').value=bill.so_bill;
+            document.getElementById('editCustomer').value=bill.ten_khach_gui||'';
+            document.getElementById('editService').value=bill.dich_vu_gtgt||'';
+            document.getElementById('editContent').value=bill.noi_dung_hang_hoa||'';
+            document.getElementById('editCOD').value=bill.cod||'';
+            document.getElementById('editPhone').value=bill.st_khach_nhan||'';
+            document.getElementById('editAddress').value=bill.ia_chi_nhan||'';
+            document.getElementById('editWeight').value=w.toFixed(2);
+            document.getElementById('editVolume').value=v.toFixed(2);
+            document.getElementById('editPacked').value=packed;
+            m.style.display='block';
+            document.querySelector('.close').onclick=()=>m.style.display='none';
+            window.onclick=e=>{if(e.target==m)m.style.display='none';};
         }
 
-        // Xử lý form chỉnh sửa
-        document.getElementById('editForm').addEventListener('submit', function(e) {
+        document.getElementById('editForm').addEventListener('submit',e=>{
             e.preventDefault();
-            
-            const billNumber = document.getElementById('editBillNumber').value;
-            const packedCount = parseInt(document.getElementById('editPacked').value) || 0;
-            const newWeight = parseFloat(document.getElementById('editWeight').value) || 0;
-            const newVolume = parseFloat(document.getElementById('editVolume').value) || 0;
-            
-            // Cập nhật dữ liệu
-            const billIndex = currentData.Bill.findIndex(b => b.so_bill === billNumber);
-            if (billIndex !== -1) {
-                currentData.Bill[billIndex].ten_khach_gui = document.getElementById('editCustomer').value;
-                currentData.Bill[billIndex].dich_vu_gtgt = document.getElementById('editService').value;
-                currentData.Bill[billIndex].noi_dung_hang_hoa = document.getElementById('editContent').value;
-                currentData.Bill[billIndex].cod = document.getElementById('editCOD').value;
-                currentData.Bill[billIndex].st_khach_nhan = document.getElementById('editPhone').value;
-                currentData.Bill[billIndex].ia_chi_nhan = document.getElementById('editAddress').value;
-                
-                // Cập nhật trọng lượng và thể tích
-                currentData.Bill[billIndex].trong_luong_thuc = newWeight;
-                currentData.Bill[billIndex].the_tich = newVolume;
+            const id=document.getElementById('editBillNumber').value;
+            const idx=currentData.Bill.findIndex(b=>b.so_bill===id);
+            if(idx>-1){
+                currentData.Bill[idx].ten_khach_gui=document.getElementById('editCustomer').value;
+                currentData.Bill[idx].dich_vu_gtgt=document.getElementById('editService').value;
+                currentData.Bill[idx].noi_dung_hang_hoa=document.getElementById('editContent').value;
+                currentData.Bill[idx].cod=document.getElementById('editCOD').value;
+                currentData.Bill[idx].st_khach_nhan=document.getElementById('editPhone').value;
+                currentData.Bill[idx].ia_chi_nhan=document.getElementById('editAddress').value;
+                currentData.Bill[idx].trong_luong_thuc=parseFloat(document.getElementById('editWeight').value)||0;
+                currentData.Bill[idx].the_tich=parseFloat(document.getElementById('editVolume').value)||0;
             }
-            
-            // Cập nhật số kiện đã xếp
-            // (Trong thực tế, bạn cần cập nhật cả dữ liệu "Xếp hàng" nếu cần)
-            
-            // Đóng modal và làm mới dữ liệu
-            document.getElementById('editModal').style.display = 'none';
+            document.getElementById('editModal').style.display='none';
             processData(currentData);
-            
-            alert('Đã cập nhật thông tin đơn hàng!');
+            alert('Đã cập nhật thông tin!');
         });
 
-        // Xuất Excel
-        document.getElementById('exportBtn').addEventListener('click', function() {
-            const table = document.getElementById('resultTable');
-            const workbook = XLSX.utils.table_to_book(table);
-            XLSX.writeFile(workbook, 'Don_hang_chua_xep_du.xlsx');
+        document.getElementById('exportBtn').addEventListener('click',()=>{
+            const wb=XLSX.utils.table_to_book(document.getElementById('resultTable'));
+            XLSX.writeFile(wb,'Don_hang_chua_xep_du.xlsx');
         });
 
-        // Chức năng in
-        document.getElementById('printBtn').addEventListener('click', function() {
-            // Thêm tiêu đề báo cáo
-            const printContent = `
-                <h1 style="text-align: center; margin-bottom: 20px;">BÁO CÁO ĐƠN HÀNG CHƯA XẾP ĐỦ</h1>
-                <div style="margin-bottom: 15px;">
-                    <strong>Ngày in:</strong> ${new Date().toLocaleDateString()} | 
-                    <strong>Tổng số đơn:</strong> ${document.getElementById('billTable').children.length}
-                </div>
+        document.getElementById('printBtn').addEventListener('click',()=>{
+            const c=`<h1 style="text-align:center;margin-bottom:20px;">BÁO CÁO ĐƠN HÀNG CHƯA XẾP ĐỦ</h1>
+                <div style="margin-bottom:15px;"><strong>Ngày in:</strong> ${new Date().toLocaleDateString()} |
+                <strong>Tổng số đơn:</strong> ${document.getElementById('billTable').children.length}</div>
                 ${document.getElementById('resultTable').outerHTML}
-                <div style="text-align: right; margin-top: 20px; font-style: italic;">
-                    Người in: ______________________
-                </div>
-            `;
-            
-            // Mở cửa sổ in
-            const printWindow = window.open('', '', 'width=1000,height=700');
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Báo cáo đơn hàng chưa xếp đủ</title>
-                        <style>
-                            body {
-                                font-family: Arial, sans-serif;
-                                margin: 15px;
-                            }
-                            table {
-                                border-collapse: collapse;
-                                width: 100%;
-                                font-size: 10px;
-                            }
-                            th, td {
-                                border: 1px solid #ddd;
-                                padding: 4px;
-                                text-align: left;
-                            }
-                            th {
-                                background-color: #f2f2f2;
-                            }
-                            .warning {
-                                background-color: #fff3cd !important;
-                            }
-                            @page {
-                                size: A4 landscape;
-                                margin: 10mm;
-                            }
-                        </style>
-                    </head>
-                    <body onload="window.print();window.close()">
-                        ${printContent}
-                    </body>
-                </html>
-            `);
-            printWindow.document.close();
+                <div style="text-align:right;margin-top:20px;font-style:italic;">Người in: ______________________</div>`;
+            const w=window.open('','','width=1000,height=700');
+            w.document.write(`<html><head><title>Báo cáo</title><style>
+                body{font-family:Arial;margin:15px;}table{border-collapse:collapse;width:100%;font-size:10px;}
+                th,td{border:1px solid #ddd;padding:4px;text-align:left;}th{background:#f2f2f2;}
+                .warning{background:#fff3cd!important;}@page{size:A4 landscape;margin:10mm;}
+            </style></head><body onload="window.print();window.close()">${c}</body></html>`);
+            w.document.close();
         });
 
-        // Mở modal chỉnh sửa từ nút
-        document.getElementById('editBtn').addEventListener('click', function() {
-            const firstRow = document.querySelector('#billTable tr');
-            if (firstRow) {
-                const billNumber = firstRow.cells[10].textContent;
-                const bill = currentData.Bill.find(b => b.so_bill === billNumber);
-                if (bill) {
-                    const packedCount = firstRow.cells[14].textContent;
-                    const weight = parseFloat(firstRow.cells[11].textContent) || 0;
-                    const volume = parseFloat(firstRow.cells[12].textContent) || 0;
-                    openEditModal(bill, packedCount, weight, volume);
-                }
-            } else {
-                alert('Không có dữ liệu để chỉnh sửa');
-            }
+        document.getElementById('editBtn').addEventListener('click',()=>{
+            const r=document.querySelector('#billTable tr');
+            if(r){
+                const id=r.cells[10].textContent;
+                const b=currentData.Bill.find(x=>x.so_bill===id);
+                if(b) openEditModal(b,r.cells[14].textContent,parseFloat(r.cells[11].textContent)||0,parseFloat(r.cells[12].textContent)||0);
+            } else alert('Không có dữ liệu để chỉnh sửa');
         });
 
-        // Gọi hàm lấy dữ liệu khi trang được tải
-        window.onload = fetchData;
+        window.onload=fetchData;
     </script>
 </body>
 </html>
