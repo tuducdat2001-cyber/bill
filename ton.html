@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiểm tra đơn hàng chưa xếp đủ</title>
+    <title>Quản lý đơn hàng vận chuyển</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,11 +11,13 @@
         }
         h1 {
             color: #d9534f;
+            text-align: center;
         }
         table {
             border-collapse: collapse;
             width: 100%;
             margin-top: 20px;
+            font-size: 12px;
         }
         th, td {
             border: 1px solid #ddd;
@@ -53,15 +55,79 @@
             cursor: pointer;
             border-radius: 4px;
         }
+        .button.print {
+            background-color: #337ab7;
+        }
+        .button.edit {
+            background-color: #f0ad4e;
+        }
         .container {
             overflow-x: auto;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 800px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 200px;
+            padding: 5px;
+        }
+        @media print {
+            body {
+                margin: 0;
+                padding: 10px;
+            }
+            .no-print {
+                display: none !important;
+            }
+            table {
+                font-size: 10px;
+                width: 100%;
+            }
+            th, td {
+                padding: 5px;
+            }
         }
     </style>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-    <h1>Đơn hàng chưa xếp đủ số kiện</h1>
-    <button id="exportBtn" class="button" style="display: none;">Xuất Excel</button>
+    <h1>QUẢN LÝ ĐƠN HÀNG VẬN CHUYỂN</h1>
+    <div class="no-print">
+        <button id="exportBtn" class="button" style="display: none;">Xuất Excel</button>
+        <button id="printBtn" class="button print" style="display: none;">In báo cáo</button>
+        <button id="editBtn" class="button edit" style="display: none;">Sửa dữ liệu</button>
+    </div>
     <div id="status" class="loading">Đang tải dữ liệu...</div>
     <div class="container">
         <table id="resultTable" style="display: none;">
@@ -71,11 +137,12 @@
                     <th>Ngày bốc hàng</th>
                     <th>Tỉnh nhận</th>
                     <th>Khách hàng</th>
-                    <th>Chưa giao</th>
-                    <th>Điểm đến</th>
-                    <th>Người nhận</th>
-                    <th>Địa chỉ nhận</th>
+                    <th>Dịch vụ GTGT</th>
+                    <th>Nội dung hàng</th>
+                    <th>Chưa xếp</th>
+                    <th>COD</th>
                     <th>SĐT nhận</th>
+                    <th>Địa chỉ nhận</th>
                     <th>Số Bill</th>
                     <th>Trọng lượng chưa xếp</th>
                     <th>Thể tích chưa xếp</th>
@@ -89,9 +156,61 @@
         </table>
     </div>
 
+    <!-- Modal chỉnh sửa dữ liệu -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Chỉnh sửa thông tin đơn hàng</h2>
+            <form id="editForm">
+                <div class="form-group">
+                    <label for="editBillNumber">Số Bill:</label>
+                    <input type="text" id="editBillNumber" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="editCustomer">Khách hàng:</label>
+                    <input type="text" id="editCustomer">
+                </div>
+                <div class="form-group">
+                    <label for="editService">Dịch vụ GTGT:</label>
+                    <input type="text" id="editService">
+                </div>
+                <div class="form-group">
+                    <label for="editContent">Nội dung hàng:</label>
+                    <input type="text" id="editContent">
+                </div>
+                <div class="form-group">
+                    <label for="editCOD">COD:</label>
+                    <input type="text" id="editCOD">
+                </div>
+                <div class="form-group">
+                    <label for="editPhone">SĐT nhận:</label>
+                    <input type="text" id="editPhone">
+                </div>
+                <div class="form-group">
+                    <label for="editAddress">Địa chỉ nhận:</label>
+                    <input type="text" id="editAddress">
+                </div>
+                <div class="form-group">
+                    <label for="editWeight">Trọng lượng chưa xếp:</label>
+                    <input type="number" step="0.01" id="editWeight">
+                </div>
+                <div class="form-group">
+                    <label for="editVolume">Thể tích chưa xếp:</label>
+                    <input type="number" step="0.01" id="editVolume">
+                </div>
+                <div class="form-group">
+                    <label for="editPacked">Tổng số kiện đã xếp:</label>
+                    <input type="number" id="editPacked">
+                </div>
+                <button type="submit" class="button">Lưu thay đổi</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         // URL API của bạn
         const API_URL = "https://script.google.com/macros/s/AKfycbwbiLYAy1-FvBceJ0ir1XqJ9yzu-SEkhp6UT4uHTKGpGDNXIHMuhvkWca0Kz1HzLIqF/exec?all=1";
+        let currentData = {};
         
         // Hiển thị trạng thái
         function showStatus(message, isError = false) {
@@ -117,7 +236,8 @@
                     throw new Error('Dữ liệu không đúng định dạng');
                 }
                 
-                processData(data.data);
+                currentData = data.data;
+                processData(currentData);
             } catch (error) {
                 showStatus('Lỗi khi tải dữ liệu: ' + error.message, true);
                 console.error('Lỗi:', error);
@@ -142,6 +262,11 @@
                 return billKien > totalPacked;
             });
 
+            // Sắp xếp theo ngày bốc hàng (mới nhất lên đầu)
+            billsWithIncompletePacking.sort((a, b) => {
+                return new Date(b.ngay_boc) - new Date(a.ngay_boc);
+            });
+
             // Hiển thị kết quả
             const tableBody = document.getElementById('billTable');
             tableBody.innerHTML = ''; // Xóa nội dung cũ
@@ -154,6 +279,8 @@
             // Hiển thị bảng kết quả
             document.getElementById('resultTable').style.display = 'table';
             document.getElementById('exportBtn').style.display = 'inline-block';
+            document.getElementById('printBtn').style.display = 'inline-block';
+            document.getElementById('editBtn').style.display = 'inline-block';
             showStatus(`Tìm thấy ${billsWithIncompletePacking.length} đơn hàng chưa xếp đủ`);
 
             billsWithIncompletePacking.forEach((bill, index) => {
@@ -175,30 +302,175 @@
                 }
                 
                 row.innerHTML = `
-                    <td></td>
+                    <td>${index + 1}</td>
                     <td>${bill.ngay_boc || ''}</td>
                     <td>${bill.tinh_nhan || ''}</td>
                     <td>${bill.ten_khach_gui || ''}</td>
-                    <td>${diff}</td>
-                    <td>${bill.tinh_nhan || ''}</td>
-                    <td>${bill.ten_khach_nhan || ''}</td>
-                    <td>${bill.ia_chi_nhan || ''}</td>
+                    <td>${bill.dich_vu_gtgt || ''}</td>
+                    <td>${bill.noi_dung_hang_hoa || ''}</td>
+                    <td>${diff} kiện</td>
+                    <td>${bill.cod || ''}</td>
                     <td>${bill.st_khach_nhan || ''}</td>
+                    <td>${bill.ia_chi_nhan || ''}</td>
                     <td>${bill.so_bill}</td>
                     <td>${tlUnpacked.toFixed(2)}</td>
                     <td>${ttUnpacked.toFixed(2)}</td>
                     <td>${billKien}</td>
                     <td>${totalPacked}</td>
                 `;
+                
+                // Thêm sự kiện click để chỉnh sửa
+                row.addEventListener('click', function() {
+                    openEditModal(bill, xepHangSummary[bill.so_bill] || 0, tlUnpacked, ttUnpacked);
+                });
+                
                 tableBody.appendChild(row);
             });
         }
+
+        // Mở modal chỉnh sửa
+        function openEditModal(bill, packedCount, weight, volume) {
+            const modal = document.getElementById('editModal');
+            const form = document.getElementById('editForm');
+            
+            document.getElementById('editBillNumber').value = bill.so_bill;
+            document.getElementById('editCustomer').value = bill.ten_khach_gui || '';
+            document.getElementById('editService').value = bill.dich_vu_gtgt || '';
+            document.getElementById('editContent').value = bill.noi_dung_hang_hoa || '';
+            document.getElementById('editCOD').value = bill.cod || '';
+            document.getElementById('editPhone').value = bill.st_khach_nhan || '';
+            document.getElementById('editAddress').value = bill.ia_chi_nhan || '';
+            document.getElementById('editWeight').value = weight.toFixed(2);
+            document.getElementById('editVolume').value = volume.toFixed(2);
+            document.getElementById('editPacked').value = packedCount;
+            
+            modal.style.display = 'block';
+            
+            // Đóng modal khi click vào nút đóng
+            document.querySelector('.close').onclick = function() {
+                modal.style.display = 'none';
+            }
+            
+            // Đóng modal khi click bên ngoài
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        }
+
+        // Xử lý form chỉnh sửa
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const billNumber = document.getElementById('editBillNumber').value;
+            const packedCount = parseInt(document.getElementById('editPacked').value) || 0;
+            const newWeight = parseFloat(document.getElementById('editWeight').value) || 0;
+            const newVolume = parseFloat(document.getElementById('editVolume').value) || 0;
+            
+            // Cập nhật dữ liệu
+            const billIndex = currentData.Bill.findIndex(b => b.so_bill === billNumber);
+            if (billIndex !== -1) {
+                currentData.Bill[billIndex].ten_khach_gui = document.getElementById('editCustomer').value;
+                currentData.Bill[billIndex].dich_vu_gtgt = document.getElementById('editService').value;
+                currentData.Bill[billIndex].noi_dung_hang_hoa = document.getElementById('editContent').value;
+                currentData.Bill[billIndex].cod = document.getElementById('editCOD').value;
+                currentData.Bill[billIndex].st_khach_nhan = document.getElementById('editPhone').value;
+                currentData.Bill[billIndex].ia_chi_nhan = document.getElementById('editAddress').value;
+                
+                // Cập nhật trọng lượng và thể tích
+                currentData.Bill[billIndex].trong_luong_thuc = newWeight;
+                currentData.Bill[billIndex].the_tich = newVolume;
+            }
+            
+            // Cập nhật số kiện đã xếp
+            // (Trong thực tế, bạn cần cập nhật cả dữ liệu "Xếp hàng" nếu cần)
+            
+            // Đóng modal và làm mới dữ liệu
+            document.getElementById('editModal').style.display = 'none';
+            processData(currentData);
+            
+            alert('Đã cập nhật thông tin đơn hàng!');
+        });
 
         // Xuất Excel
         document.getElementById('exportBtn').addEventListener('click', function() {
             const table = document.getElementById('resultTable');
             const workbook = XLSX.utils.table_to_book(table);
             XLSX.writeFile(workbook, 'Don_hang_chua_xep_du.xlsx');
+        });
+
+        // Chức năng in
+        document.getElementById('printBtn').addEventListener('click', function() {
+            // Thêm tiêu đề báo cáo
+            const printContent = `
+                <h1 style="text-align: center; margin-bottom: 20px;">BÁO CÁO ĐƠN HÀNG CHƯA XẾP ĐỦ</h1>
+                <div style="margin-bottom: 15px;">
+                    <strong>Ngày in:</strong> ${new Date().toLocaleDateString()} | 
+                    <strong>Tổng số đơn:</strong> ${document.getElementById('billTable').children.length}
+                </div>
+                ${document.getElementById('resultTable').outerHTML}
+                <div style="text-align: right; margin-top: 20px; font-style: italic;">
+                    Người in: ______________________
+                </div>
+            `;
+            
+            // Mở cửa sổ in
+            const printWindow = window.open('', '', 'width=1000,height=700');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Báo cáo đơn hàng chưa xếp đủ</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                margin: 15px;
+                            }
+                            table {
+                                border-collapse: collapse;
+                                width: 100%;
+                                font-size: 10px;
+                            }
+                            th, td {
+                                border: 1px solid #ddd;
+                                padding: 4px;
+                                text-align: left;
+                            }
+                            th {
+                                background-color: #f2f2f2;
+                            }
+                            .warning {
+                                background-color: #fff3cd !important;
+                            }
+                            @page {
+                                size: A4 landscape;
+                                margin: 10mm;
+                            }
+                        </style>
+                    </head>
+                    <body onload="window.print();window.close()">
+                        ${printContent}
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        });
+
+        // Mở modal chỉnh sửa từ nút
+        document.getElementById('editBtn').addEventListener('click', function() {
+            const firstRow = document.querySelector('#billTable tr');
+            if (firstRow) {
+                const billNumber = firstRow.cells[10].textContent;
+                const bill = currentData.Bill.find(b => b.so_bill === billNumber);
+                if (bill) {
+                    const packedCount = firstRow.cells[14].textContent;
+                    const weight = parseFloat(firstRow.cells[11].textContent) || 0;
+                    const volume = parseFloat(firstRow.cells[12].textContent) || 0;
+                    openEditModal(bill, packedCount, weight, volume);
+                }
+            } else {
+                alert('Không có dữ liệu để chỉnh sửa');
+            }
         });
 
         // Gọi hàm lấy dữ liệu khi trang được tải
