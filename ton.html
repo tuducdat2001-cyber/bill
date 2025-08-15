@@ -30,6 +30,27 @@
             table { font-size: 10px; width: 100%; }
             th, td { padding: 5px; }
         }
+
+        /* 🎯 Làm nổi bật cột Số Bill (bền vững theo class) */
+        #resultTable th.bill-col,
+        #resultTable td.bill-col {
+            background: #fff5e6;
+            font-weight: 700;
+            color: #c25700;
+            border-left: 2px solid #f5b76b;
+            border-right: 2px solid #f5b76b;
+            cursor: copy; /* gợi ý có thể copy */
+        }
+        @media print {
+            #resultTable th.bill-col,
+            #resultTable td.bill-col {
+                background: #ffffcc !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                border-left: 2px solid #999;
+                border-right: 2px solid #999;
+            }
+        }
     </style>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 </head>
@@ -38,7 +59,7 @@
     <div class="no-print">
         <button id="exportBtn" class="button" style="display: none;">Xuất Excel</button>
         <button id="printBtn" class="button print" style="display: none;">In báo cáo</button>
-        <button id="editBtn" class="button edit" style="display: none;">Sửa dữ liệu</button>
+        <button id="editBtn" class="button edit" style="display: none;"></button>
     </div>
     <div id="status" class="loading">Đang tải dữ liệu...</div>
     <div class="container">
@@ -52,10 +73,11 @@
                     <th>Dịch vụ GTGT</th>
                     <th>Nội dung hàng</th>
                     <th>Chưa xếp</th>
+                    <th>Đơn vị</th><!-- mới -->
                     <th>COD</th>
                     <th>SĐT nhận</th>
                     <th>Địa chỉ nhận</th>
-                    <th>Số Bill</th>
+                    <th class="bill-col">Số Bill</th> <!-- ✅ thêm class bền vững -->
                     <th>Trọng lượng chưa xếp</th>
                     <th>Thể tích chưa xếp</th>
                     <th>Số kiện (Bill)</th>
@@ -91,10 +113,16 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbwbiLYAy1-FvBceJ0ir1XqJ9yzu-SEkhp6UT4uHTKGpGDNXIHMuhvkWca0Kz1HzLIqF/exec?all=1";
         let currentData = {};
         const priorityMap = {};
+
         const normalizeProvince = s => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
         const getPriority = tinh => priorityMap[normalizeProvince(tinh)] ?? 0;
         const parseVnDate = s => { const p = (s || "").split("/"); return p.length===3 ? new Date(+p[2], p[1]-1, +p[0]) : new Date(s); };
-        function showStatus(msg, err=false){const el=document.getElementById('status');el.textContent=msg;el.className=err?'error':'loading';}
+
+        function showStatus(msg, err=false){
+            const el=document.getElementById('status');
+            el.textContent=msg;
+            el.className=err?'error':'loading';
+        }
 
         async function fetchData(){
             showStatus('Đang tải dữ liệu...');
@@ -104,40 +132,93 @@
                 const data=await res.json();
                 if(!data.data || !data.data.Bill) throw new Error('Sai cấu trúc dữ liệu');
                 currentData=data.data;
+
+                // map ưu tiên tỉnh từ bảng "Phụ"
                 if(Array.isArray(currentData["Phụ"])){
-                    currentData["Phụ"].forEach(r=>priorityMap[normalizeProvince(r.tinh)]=parseInt(r.uu_tien)||0);
+                    currentData["Phụ"].forEach(r=>{
+                        priorityMap[normalizeProvince(r.tinh)] = parseInt(r.uu_tien,10) || 0;
+                    });
                 }
+
                 processData(currentData);
-            }catch(e){showStatus('Lỗi: '+e.message,true);}
+            }catch(e){
+                console.error(e);
+                showStatus('Lỗi: '+e.message,true);
+            }
         }
 
         function processData(data){
+            // tổng số kiện đã xếp theo bill
             const sumPacked={};
-            data["Xếp hàng"].forEach(i=>sumPacked[i.bill]=(sumPacked[i.bill]||0)+(parseInt(i.so_kien)||0));
-            let bills=data.Bill.filter(b=>(parseInt(b.so_kien)||0)>(sumPacked[b.so_bill]||0));
+            (data["Xếp hàng"]||[]).forEach(i=>{
+                sumPacked[i.bill] = (sumPacked[i.bill]||0) + (parseInt(i.so_kien)||0);
+            });
+
+            // các bill chưa xếp đủ
+            let bills=(data.Bill||[]).filter(b=>{
+                const billKien=parseInt(b.so_kien)||0;
+                const packed=sumPacked[b.so_bill]||0;
+                return billKien > packed;
+            });
+
+            // sắp theo ưu tiên tỉnh, 0 xuống sau, trong cùng ưu tiên: ngày mới trước
             bills.sort((a,b)=>{
                 const pa=getPriority(a.tinh_nhan), pb=getPriority(b.tinh_nhan);
                 if(pa===0 && pb===0) return parseVnDate(b.ngay_boc)-parseVnDate(a.ngay_boc);
-                if(pa===0) return 1; if(pb===0) return -1;
+                if(pa===0) return 1;
+                if(pb===0) return -1;
                 return pa!==pb ? pa-pb : parseVnDate(b.ngay_boc)-parseVnDate(a.ngay_boc);
             });
-            const tb=document.getElementById('billTable');tb.innerHTML='';
-            if(!bills.length){showStatus('Tất cả đơn hàng đã xếp đủ');return;}
+
+            const tb=document.getElementById('billTable');
+            tb.innerHTML='';
+
+            if(!bills.length){
+                showStatus('Tất cả đơn hàng đã xếp đủ');
+                return;
+            }
+
             document.getElementById('resultTable').style.display='table';
             document.getElementById('exportBtn').style.display='inline-block';
             document.getElementById('printBtn').style.display='inline-block';
             document.getElementById('editBtn').style.display='inline-block';
             showStatus(`Tìm thấy ${bills.length} đơn hàng chưa xếp đủ`);
-            bills.forEach((b,i)=>{
-                const billKien=parseInt(b.so_kien)||0, packed=sumPacked[b.so_bill]||0, diff=billKien-packed;
-                const tlUn=(parseFloat(b.trong_luong_thuc)||0)*(1-(billKien?packed/billKien:0));
-                const ttUn=(parseFloat(b.the_tich)||0)*(1-(billKien?packed/billKien:0));
-                const tr=document.createElement('tr'); if(diff>0) tr.classList.add('warning');
-                tr.innerHTML=`<td></td><td>${b.ngay_boc||''}</td><td>${b.tinh_nhan||''}</td><td>${b.ten_khach_gui||''}</td>
-                    <td>${b.dich_vu_gtgt||''}</td><td>${b.noi_dung_hang_hoa||''}</td><td>${diff} kiện</td><td>${b.cod||''}</td>
-                    <td>${b.st_khach_nhan||''}</td><td>${b.ia_chi_nhan||''}</td><td>${b.so_bill}</td>
-                    <td>${tlUn.toFixed(2)}</td><td>${ttUn.toFixed(2)}</td><td>${billKien}</td><td>${packed}</td>`;
-                tr.addEventListener('click',()=>openEditModal(b,packed,tlUn,ttUn));
+
+            bills.forEach((b)=>{
+                const billKien=parseInt(b.so_kien)||0;
+                const packed=sumPacked[b.so_bill]||0;
+                const diff=billKien-packed;
+
+                // TL/TT chưa xếp theo tỷ lệ chưa xếp
+                const ratio = billKien ? (packed / billKien) : 0;
+                const tlUn = (parseFloat(b.trong_luong_thuc)||0) * (1 - ratio);
+                const ttUn = (parseFloat(b.the_tich)||0) * (1 - ratio);
+
+                const tr=document.createElement('tr');
+                if(diff>0) tr.classList.add('warning');
+
+                // STT để trống + tách "Chưa xếp" thành 2 cột: số & đơn vị "kiện"
+                tr.innerHTML = `
+                    <td></td>
+                    <td>${b.ngay_boc || ''}</td>
+                    <td>${b.tinh_nhan || ''}</td>
+                    <td>${b.ten_khach_gui || ''}</td>
+                    <td>${b.dich_vu_gtgt || ''}</td>
+                    <td>${b.noi_dung_hang_hoa || ''}</td>
+                    <td>${diff}</td>
+                    <td>kiện</td>
+                    <td>${b.cod || ''}</td>
+                    <td>${b.st_khach_nhan || ''}</td>
+                    <td>${b.ia_chi_nhan || ''}</td>
+                    <td class="bill-col" title="Click để copy">${b.so_bill}</td> <!-- ✅ ô Số Bill được gắn class -->
+                    <td>${tlUn.toFixed(2)}</td>
+                    <td>${ttUn.toFixed(2)}</td>
+                    <td>${billKien}</td>
+                    <td>${packed}</td>
+                `;
+
+                // Nhấn vào hàng vẫn mở modal như cũ
+                tr.addEventListener('click',()=>openEditModal(b, packed, tlUn, ttUn));
                 tb.appendChild(tr);
             });
         }
@@ -154,9 +235,10 @@
             document.getElementById('editWeight').value=w.toFixed(2);
             document.getElementById('editVolume').value=v.toFixed(2);
             document.getElementById('editPacked').value=packed;
+
             m.style.display='block';
             document.querySelector('.close').onclick=()=>m.style.display='none';
-            window.onclick=e=>{if(e.target==m)m.style.display='none';};
+            window.onclick=e=>{ if(e.target==m) m.style.display='none'; };
         }
 
         document.getElementById('editForm').addEventListener('submit',e=>{
@@ -175,7 +257,6 @@
             }
             document.getElementById('editModal').style.display='none';
             processData(currentData);
-            alert('Đã cập nhật thông tin!');
         });
 
         document.getElementById('exportBtn').addEventListener('click',()=>{
@@ -194,17 +275,54 @@
                 body{font-family:Arial;margin:15px;}table{border-collapse:collapse;width:100%;font-size:10px;}
                 th,td{border:1px solid #ddd;padding:4px;text-align:left;}th{background:#f2f2f2;}
                 .warning{background:#fff3cd!important;}@page{size:A4 landscape;margin:10mm;}
+                /* In vẫn nổi bật cột Số Bill */
+                #resultTable th.bill-col,#resultTable td.bill-col{
+                    background:#ffffcc !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                    border-left:2px solid #999;border-right:2px solid #999;
+                    font-weight:700;color:#000;
+                }
             </style></head><body onload="window.print();window.close()">${c}</body></html>`);
             w.document.close();
         });
 
+        // Mở modal từ nút "Sửa dữ liệu" (giữ nguyên chỉ số cột)
         document.getElementById('editBtn').addEventListener('click',()=>{
             const r=document.querySelector('#billTable tr');
             if(r){
-                const id=r.cells[10].textContent;
-                const b=currentData.Bill.find(x=>x.so_bill===id);
-                if(b) openEditModal(b,r.cells[14].textContent,parseFloat(r.cells[11].textContent)||0,parseFloat(r.cells[12].textContent)||0);
-            } else alert('Không có dữ liệu để chỉnh sửa');
+                // STT(0) | Ngày(1) | Tỉnh(2) | KH(3) | DV(4) | Nội dung(5) | Chưa xếp(6) | Đơn vị(7)
+                // COD(8) | SĐT(9) | Đ/c(10) | Số Bill(11) | TL(12) | TT(13) | Số kiện(14) | Đã xếp(15)
+                const id = r.cells[11].textContent;
+                const b = currentData.Bill.find(x=>x.so_bill===id);
+                if(b){
+                    const packed = parseInt(r.cells[15].textContent)||0;
+                    const weight = parseFloat(r.cells[12].textContent)||0;
+                    const volume = parseFloat(r.cells[13].textContent)||0;
+                    openEditModal(b, packed, weight, volume);
+                }
+            } else {
+                alert('Không có dữ liệu để chỉnh sửa');
+            }
+        });
+
+        // 📋 Click vào Số Bill để copy (không mở modal)
+        document.getElementById('billTable').addEventListener('click', (e)=>{
+            const cell = e.target.closest('td.bill-col');
+            if(!cell) return;
+            e.stopPropagation(); // chặn mở modal khi click ô Số Bill
+            const text = cell.textContent.trim();
+            if(!text) return;
+            (navigator.clipboard && navigator.clipboard.writeText)
+                ? navigator.clipboard.writeText(text).then(()=>{
+                    cell.title = 'Đã copy!';
+                    setTimeout(()=>cell.title='', 800);
+                }).catch(()=>{})
+                : (function(){ /* fallback đơn giản */ 
+                    const ta=document.createElement('textarea'); ta.value=text;
+                    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+                    document.body.removeChild(ta);
+                })();
         });
 
         window.onload=fetchData;
