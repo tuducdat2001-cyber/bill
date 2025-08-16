@@ -80,8 +80,6 @@
                     <th class="bill-col">Số Bill</th> <!-- ✅ thêm class bền vững -->
                     <th>Trọng lượng chưa xếp</th>
                     <th>Thể tích chưa xếp</th>
-                    <th>Số kiện (Bill)</th>
-                    <th>Tổng số kiện đã xếp</th>
                 </tr>
             </thead>
             <tbody id="billTable"></tbody>
@@ -213,8 +211,6 @@
                     <td class="bill-col" title="Click để copy">${b.so_bill}</td> <!-- ✅ ô Số Bill được gắn class -->
                     <td>${tlUn.toFixed(2)}</td>
                     <td>${ttUn.toFixed(2)}</td>
-                    <td>${billKien}</td>
-                    <td>${packed}</td>
                 `;
 
                 // Nhấn vào hàng vẫn mở modal như cũ
@@ -292,11 +288,11 @@
             const r=document.querySelector('#billTable tr');
             if(r){
                 // STT(0) | Ngày(1) | Tỉnh(2) | KH(3) | DV(4) | Nội dung(5) | Chưa xếp(6) | Đơn vị(7)
-                // COD(8) | SĐT(9) | Đ/c(10) | Số Bill(11) | TL(12) | TT(13) | Số kiện(14) | Đã xếp(15)
+                // COD(8) | SĐT(9) | Đ/c(10) | Số Bill(11) | TL(12) | TT(13)
                 const id = r.cells[11].textContent;
                 const b = currentData.Bill.find(x=>x.so_bill===id);
                 if(b){
-                    const packed = parseInt(r.cells[15].textContent)||0;
+                    const packed = parseInt(document.getElementById('editPacked').value)||0;
                     const weight = parseFloat(r.cells[12].textContent)||0;
                     const volume = parseFloat(r.cells[13].textContent)||0;
                     openEditModal(b, packed, weight, volume);
