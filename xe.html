@@ -8,36 +8,36 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            font-size: 12px; /* giảm cỡ chữ */
         }
-        h1, h2 {
-            color: #333;
-        }
+        h1, h2, h3 { color: #333; }
+        h1 { font-size: 18px; margin: 0 0 10px; }
+        h2 { font-size: 15px; margin: 10px 0; }
+        h3 { font-size: 14px; margin: 10px 0; }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            font-size: 12px;
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 6px;
             text-align: left;
         }
-        th {
-            background-color: #f2f2f2;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+
         .xe-tab {
             display: none;
-            padding: 15px;
+            padding: 12px;
             border: 1px solid #ddd;
             border-top: none;
             border-radius: 0 0 5px 5px;
         }
-        .xe-tab.active {
-            display: block;
-        }
+        .xe-tab.active { display: block; }
+
         .tab-buttons {
             display: flex;
             margin-bottom: 0;
@@ -46,269 +46,147 @@
             border-bottom: 1px solid #ddd;
         }
         .tab-button {
-            padding: 10px 15px;
+            padding: 8px 12px;
             cursor: pointer;
             background-color: #f1f1f1;
             border: 1px solid #ddd;
             border-bottom: none;
             margin-right: 5px;
             border-radius: 5px 5px 0 0;
+            font-size: 12px;
         }
         .tab-button.active {
             background-color: #4CAF50;
             color: white;
             border-color: #4CAF50;
         }
+
         .print-btn {
             background-color: #4CAF50;
             color: white;
-            padding: 10px 15px;
+            padding: 8px 12px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            margin: 10px 5px;
-            font-size: 16px;
+            margin: 8px 4px;
+            font-size: 14px;
         }
-        .print-btn:hover {
-            background-color: #45a049;
-        }
-        .print-all-btn {
-            background-color: #2196F3;
-        }
-        .print-all-btn:hover {
-            background-color: #0b7dda;
-        }
+        .print-btn:hover { background-color: #45a049; }
+
         .xep-hang-table {
-            margin-left: 20px;
-            width: calc(100% - 20px);
+            margin-left: 16px;
+            width: calc(100% - 16px);
         }
-        .filter-container {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: flex-end;
-        }
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-        }
-        .filter-label {
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .filter-input {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .filter-button {
-            padding: 8px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .filter-button:hover {
-            background-color: #45a049;
-        }
-        .reset-button {
-            padding: 8px 15px;
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .reset-button:hover {
-            background-color: #d32f2f;
-        }
+
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            .print-section, .print-section * {
-                visibility: visible;
-            }
+            body * { visibility: hidden; }
+            .print-section, .print-section * { visibility: visible; }
             .print-section {
                 position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
             }
-            .tab-buttons, .print-btn, .filter-container {
-                display: none;
-            }
+            .tab-buttons, .print-btn { display: none; }
         }
     </style>
 </head>
 <body>
     <h1>Thông tin vận chuyển</h1>
-    
-    <div class="filter-container">
-        <div class="filter-group">
-            <label class="filter-label">Ngày xuất:</label>
-            <input type="date" id="filter-ngay-xuat" class="filter-input">
-        </div>
-        
-        <div class="filter-group">
-            <label class="filter-label">Nhà cung cấp:</label>
-            <select id="filter-nha-cung-cap" class="filter-input">
-                <option value="">Tất cả</option>
-            </select>
-        </div>
-        
-        <div class="filter-group">
-            <label class="filter-label">Số bill:</label>
-            <input type="text" id="filter-so-bill" class="filter-input" placeholder="Nhập số bill">
-        </div>
-        
-        <button class="filter-button" onclick="applyFilters()">Lọc</button>
-        <button class="reset-button" onclick="resetFilters()">Reset</button>
-    </div>
-    
-    <div id="controls">
-        <button class="print-all-btn print-btn" onclick="printAll()">In tất cả</button>
-    </div>
-    
+
     <ul class="tab-buttons" id="xe-tabs"></ul>
     <div id="xe-container"></div>
 
     <script>
         // URL API
         const apiUrl = "https://script.google.com/macros/s/AKfycbwbiLYAy1-FvBceJ0ir1XqJ9yzu-SEkhp6UT4uHTKGpGDNXIHMuhvkWca0Kz1HzLIqF/exec?all=1";
-        
+
+        // Lấy ID xe từ URL (?xe=... hoặc ?id=...)
+        const params = new URLSearchParams(window.location.search);
+        const urlXeIdRaw = (params.get('xe') || params.get('id') || '').trim();
+        const urlXeId = urlXeIdRaw ? String(urlXeIdRaw) : null;
+
         // Biến lưu trữ dữ liệu
         let xeData = [];
-        let filteredData = [];
-        
+
         // Lấy dữ liệu từ API
         fetch(apiUrl)
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 xeData = data;
-                filteredData = data;
-                initNhaCungCapFilter(data.data["Nhà cung cấp"]);
                 displayXeData(data);
             })
-            .catch(error => {
-                console.error("Lỗi khi lấy dữ liệu:", error);
-                document.getElementById("xe-container").innerHTML = "<p>Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</p>";
+            .catch(err => {
+                console.error("Lỗi khi lấy dữ liệu:", err);
+                document.getElementById("xe-container").innerHTML =
+                    "<p>Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</p>";
             });
 
-        // Khởi tạo bộ lọc nhà cung cấp
-        function initNhaCungCapFilter(nhaCungCapData) {
-            const filterSelect = document.getElementById("filter-nha-cung-cap");
-            
-            nhaCungCapData.forEach(ncc => {
-                const option = document.createElement("option");
-                option.value = ncc.ma_nha_cung_cap;
-                option.textContent = ncc.ten_nha_cung_cap;
-                filterSelect.appendChild(option);
-            });
-        }
-        
-        // Áp dụng bộ lọc
-        function applyFilters() {
-            const ngayXuatFilter = document.getElementById("filter-ngay-xuat").value;
-            const nhaCungCapFilter = document.getElementById("filter-nha-cung-cap").value;
-            const soBillFilter = document.getElementById("filter-so-bill").value.toLowerCase();
-            
-            // Tạo bản sao của dữ liệu gốc để lọc
-            let filtered = JSON.parse(JSON.stringify(xeData));
-            
-            // Lọc theo ngày xuất
-            if (ngayXuatFilter) {
-                const filterDate = new Date(ngayXuatFilter).toLocaleDateString('en-GB');
-                filtered.data.Xe = filtered.data.Xe.filter(xe => {
-                    if (!xe.ngay) return false;
-                    const xeDate = new Date(xe.ngay.split('/').reverse().join('-')).toLocaleDateString('en-GB');
-                    return xeDate === filterDate;
-                });
-            }
-            
-            // Lọc theo nhà cung cấp
-            if (nhaCungCapFilter) {
-                filtered.data.Xe = filtered.data.Xe.filter(xe => xe.nha_cung_cap === nhaCungCapFilter);
-            }
-            
-            // Lọc theo số bill (trong bảng xếp hàng)
-            if (soBillFilter) {
-                const filteredXeIds = new Set();
-                
-                // Tìm các xe có bill trùng khớp
-                filtered.data["Xếp hàng"] = filtered.data["Xếp hàng"].filter(item => {
-                    if (item.bill && item.bill.toLowerCase().includes(soBillFilter)) {
-                        filteredXeIds.add(item.xe);
-                        return true;
-                    }
-                    return false;
-                });
-                
-                // Chỉ giữ lại các xe có trong filteredXeIds
-                if (filteredXeIds.size > 0) {
-                    filtered.data.Xe = filtered.data.Xe.filter(xe => filteredXeIds.has(xe.id));
-                } else {
-                    filtered.data.Xe = [];
-                }
-            }
-            
-            filteredData = filtered;
-            displayXeData(filtered);
-        }
-        
-        // Reset bộ lọc
-        function resetFilters() {
-            document.getElementById("filter-ngay-xuat").value = "";
-            document.getElementById("filter-nha-cung-cap").value = "";
-            document.getElementById("filter-so-bill").value = "";
-            
-            filteredData = JSON.parse(JSON.stringify(xeData));
-            displayXeData(filteredData);
-        }
-        
         // Hiển thị dữ liệu xe và xếp hàng
-        function displayXeData(data) {
+        function displayXeData(resp) {
             const xeContainer = document.getElementById("xe-container");
             const xeTabs = document.getElementById("xe-tabs");
-            
-            // Kiểm tra xem có dữ liệu xe không
-            if (!data.data.Xe || data.data.Xe.length === 0) {
-                xeContainer.innerHTML = "<p>Không tìm thấy xe nào phù hợp với bộ lọc.</p>";
-                xeTabs.innerHTML = "";
+
+            const allXe = resp?.data?.Xe || [];
+            const xepHangAll = resp?.data?.["Xếp hàng"] || [];
+            const khachHangAll = resp?.data?.["Khách hàng"] || [];
+
+            if (allXe.length === 0) {
+                xeContainer.innerHTML = "<p>Không có dữ liệu xe nào.</p>";
                 return;
             }
-            
+
+            // Xác định xe đang active theo URL (nếu có và tồn tại)
+            let activeId = null;
+            if (urlXeId && allXe.some(x => String(x.id) === String(urlXeId))) {
+                activeId = String(urlXeId);
+            }
+
+            // Nếu có activeId -> chỉ hiển thị xe đó; ngược lại hiển thị toàn bộ
+            const xeList = activeId ? allXe.filter(x => String(x.id) === activeId) : allXe;
+
+            // Nếu chỉ 1 xe, ẩn tab cho gọn
+            if (xeList.length === 1) {
+                xeTabs.style.display = "none";
+            } else {
+                xeTabs.style.display = "";
+            }
+
             // Xóa nội dung cũ
             xeContainer.innerHTML = "";
             xeTabs.innerHTML = "";
-            
-            // Duyệt qua từng xe
-            data.data.Xe.forEach((xe, index) => {
-                // Tạo tab button
+
+            // Tạo tabs + nội dung
+            xeList.forEach((xe, index) => {
+                const isActive = activeId ? (String(xe.id) === activeId) : (index === 0);
+
+                // Tab button
                 const tabButton = document.createElement("li");
-                tabButton.className = `tab-button ${index === 0 ? 'active' : ''}`;
+                tabButton.className = `tab-button ${isActive ? 'active' : ''}`;
                 tabButton.textContent = `Xe ${xe.id || ''} - ${xe.bien_kiem_soat || ''}`;
+                tabButton.dataset.index = index;
                 tabButton.onclick = () => switchTab(index);
                 xeTabs.appendChild(tabButton);
-                
-                // Tạo div cho thông tin xe
+
+                // Khối nội dung của xe
                 const xeDiv = document.createElement("div");
-                xeDiv.className = `xe-tab print-section ${index === 0 ? 'active' : ''}`;
+                xeDiv.className = `xe-tab print-section ${isActive ? 'active' : ''}`;
                 xeDiv.id = `xe-tab-${index}`;
-                
-                // Thêm nút in cho từng xe
+
+                // Nút in riêng xe
                 const printButton = document.createElement("button");
                 printButton.className = "print-btn";
+                printButton.dataset.role = "print-xe";
+                printButton.dataset.index = index;
                 printButton.textContent = `In thông tin xe ${xe.id || ''}`;
                 printButton.onclick = () => printXe(index);
                 xeDiv.appendChild(printButton);
-                
-                // Thêm thông tin xe
+
+                // Tiêu đề + bảng thông tin xe
+                const xeHeader = document.createElement("h2");
+                xeHeader.textContent = `Thông tin xe ${xe.id || ''}`;
+                xeDiv.appendChild(xeHeader);
+
                 const xeInfoTable = document.createElement("table");
                 xeInfoTable.innerHTML = `
                     <tr>
@@ -333,132 +211,100 @@
                     </tr>
                 `;
                 xeDiv.appendChild(xeInfoTable);
-                
-                // Tìm các bản ghi xếp hàng tương ứng với xe này
-                const xepHangItems = data.data["Xếp hàng"].filter(item => item.xe === xe.id);
-                
+
+                // Bảng xếp hàng: BỎ "Ngày xuất xe", đưa "Tỉnh trả" trước "Số Bill",
+                // và THÊM "Nơi trả", "Xã trả"
+                const xepHangItems = xepHangAll.filter(item => String(item.xe) === String(xe.id));
+
+                const xhHeader = document.createElement("h3");
+                xhHeader.textContent = "Danh sách xếp hàng";
+                xeDiv.appendChild(xhHeader);
+
                 if (xepHangItems.length > 0) {
-                    // Tạo bảng xếp hàng
                     const xepHangTable = document.createElement("table");
                     xepHangTable.className = "xep-hang-table";
-                    
                     xepHangTable.innerHTML = `
                         <tr>
                             <th>STT</th>
-                            <th>Số Bill</th>
+                            <th>Tỉnh trả</th>
                             <th>Khách hàng</th>
                             <th>Tên mặt hàng</th>
                             <th>Số kiện</th>
-                            <th>Tỉnh trả</th>
-                            <th>Ngày xuất xe</th>
+                            <th>Nơi trả</th>
+                            <th>Xã trả</th>
+                            <th>Số Bill</th>
                             <th>Ghi chú</th>
                         </tr>
                     `;
-                    
-                    // Thêm các hàng dữ liệu xếp hàng
+
                     xepHangItems.forEach(item => {
-                        // Tìm tên khách hàng từ bảng Khách hàng
-                        const khachHang = data.data["Khách hàng"].find(kh => kh.ma_khach_hang === item.khach_hang);
-                        const tenKhachHang = khachHang ? khachHang.ten_khach_hang : item.khach_hang;
-                        
+                        const khachHang = khachHangAll.find(kh => kh.ma_khach_hang === item.khach_hang);
+                        const tenKhachHang = khachHang ? khachHang.ten_khach_hang : (item.khach_hang || '');
+
                         const row = document.createElement("tr");
                         row.innerHTML = `
                             <td>${item.stt || ''}</td>
-                            <td>${item.bill || ''}</td>
+                            <td>${item.tinh_tra || ''}</td>
                             <td>${tenKhachHang || ''}</td>
                             <td>${item.ten_mat_hang || ''}</td>
                             <td>${item.so_kien || ''}</td>
-                            <td>${item.tinh_tra || ''}</td>
-                            <td>${item.ngay_xuat_xe || ''}</td>
+                            <td>${item.noi_tra || ''}</td>
+                            <td>${item.xa_tra || ''}</td>
+                            <td>${item.bill || ''}</td>
                             <td>${item.ghi_chu || ''}</td>
                         `;
                         xepHangTable.appendChild(row);
                     });
-                    
+
                     xeDiv.appendChild(xepHangTable);
                 } else {
                     const noData = document.createElement("p");
                     noData.textContent = "Không có dữ liệu xếp hàng cho xe này.";
                     xeDiv.appendChild(noData);
                 }
-                
+
                 xeContainer.appendChild(xeDiv);
             });
         }
-        
+
         // Chuyển tab
         function switchTab(index) {
-            // Ẩn tất cả các tab
-            document.querySelectorAll('.xe-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Hiển thị tab được chọn
-            document.getElementById(`xe-tab-${index}`).classList.add('active');
-            document.querySelectorAll('.tab-button')[index].classList.add('active');
+            document.querySelectorAll('.xe-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+
+            const tab = document.getElementById(`xe-tab-${index}`);
+            if (tab) tab.classList.add('active');
+            const btn = document.querySelectorAll('.tab-button')[index];
+            if (btn) btn.classList.add('active');
         }
-        
+
+        // Khôi phục sự kiện sau khi in (cho các nút được tạo động)
+        function restoreEvents() {
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                const i = parseInt(btn.dataset.index, 10);
+                if (!isNaN(i)) btn.onclick = () => switchTab(i);
+            });
+            document.querySelectorAll('.print-btn[data-role="print-xe"]').forEach(btn => {
+                const i = parseInt(btn.dataset.index, 10);
+                if (!isNaN(i)) btn.onclick = () => printXe(i);
+            });
+        }
+
         // In thông tin 1 xe
         function printXe(index) {
             const printContent = document.getElementById(`xe-tab-${index}`).innerHTML;
             const originalContent = document.body.innerHTML;
-            
+
             document.body.innerHTML = `
                 <div class="print-section">
                     ${printContent}
-                    <p style="text-align: right; margin-top: 20px;">Ngày in: ${new Date().toLocaleDateString()}</p>
+                    <p style="text-align: right; margin-top: 12px;">Ngày in: ${new Date().toLocaleDateString()}</p>
                 </div>
             `;
-            
             window.print();
+
             document.body.innerHTML = originalContent;
-            // Sau khi in, khôi phục lại sự kiện click
-            document.querySelectorAll('.tab-button').forEach((btn, i) => {
-                btn.onclick = () => switchTab(i);
-            });
-            document.querySelectorAll('.print-btn').forEach((btn, i) => {
-                if (i === 0) {
-                    btn.onclick = () => printAll();
-                } else {
-                    btn.onclick = () => printXe(i-1);
-                }
-            });
-        }
-        
-        // In tất cả xe
-        function printAll() {
-            const printSections = document.querySelectorAll('.print-section');
-            let allContent = '';
-            
-            printSections.forEach(section => {
-                allContent += section.innerHTML + '<div style="page-break-after: always;"></div>';
-            });
-            
-            const originalContent = document.body.innerHTML;
-            
-            document.body.innerHTML = `
-                <div class="print-all">
-                    ${allContent}
-                    <p style="text-align: right; margin-top: 20px;">Ngày in: ${new Date().toLocaleDateString()}</p>
-                </div>
-            `;
-            
-            window.print();
-            document.body.innerHTML = originalContent;
-            // Sau khi in, khôi phục lại sự kiện click
-            document.querySelectorAll('.tab-button').forEach((btn, i) => {
-                btn.onclick = () => switchTab(i);
-            });
-            document.querySelectorAll('.print-btn').forEach((btn, i) => {
-                if (i === 0) {
-                    btn.onclick = () => printAll();
-                } else {
-                    btn.onclick = () => printXe(i-1);
-                }
-            });
+            restoreEvents();
         }
     </script>
 </body>
