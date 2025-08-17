@@ -1,357 +1,465 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Phiếu Thông Tin Xe</title>
-  <style>
-    :root {
-      --c-border:#d0d7de;
-      --c-text:#111827;
-      --c-muted:#6b7280;
-      --c-bg:#ffffff;
-      --c-soft:#f9fafb;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
-      color: var(--c-text); background: var(--c-soft);
-    }
-    .page {
-      max-width: 1200px; margin: 24px auto; padding: 16px;
-    }
-    .card {
-      background: var(--c-bg); border: 1px solid var(--c-border);
-      border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.04);
-      padding: 16px;
-    }
-    .header {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px;
-    }
-    .title {
-      font-size: 20px; font-weight: 700; letter-spacing: .2px;
-    }
-    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
-    button {
-      appearance: none; border: 1px solid var(--c-border); background: #fff;
-      padding: 8px 12px; border-radius: 999px; cursor: pointer; font-weight: 600;
-    }
-    button:hover { background: #f3f4f6; }
-    .grid {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 16px;
-    }
-    .field { padding: 8px 12px; background: #fff; border: 1px dashed var(--c-border); border-radius: 12px; }
-    .label { font-size: 12px; color: var(--c-muted); margin-bottom: 2px; }
-    .value { font-weight: 600; word-break: break-word; }
-    .subtle { color: var(--c-muted); }
-    .table-wrap {
-      margin-top: 16px; overflow: auto; background: #fff; border: 1px solid var(--c-border); border-radius: 16px;
-    }
-    table { border-collapse: collapse; width: 100%; min-width: 900px; }
-    thead th {
-      position: sticky; top: 0; background: #f3f4f6; z-index: 1;
-      text-align: left; padding: 10px; font-size: 13px; border-bottom: 1px solid var(--c-border);
-    }
-    tbody td {
-      padding: 8px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; font-size: 14px;
-    }
-    tfoot td {
-      padding: 10px; font-weight: 700; background: #fafafa; border-top: 1px solid var(--c-border);
-    }
-    .badge {
-      display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; border: 1px solid var(--c-border);
-      background:#fff;
-    }
-    .thumb {
-      width: 68px; height: 68px; object-fit: cover; border: 1px solid var(--c-border); border-radius: 8px;
-    }
-    .empty {
-      padding: 16px; text-align: center; color: var(--c-muted);
-    }
-    @media (max-width: 920px) {
-      .grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media print {
-      body { background: #fff; }
-      .page { margin: 0; padding: 0; }
-      .card { border: none; box-shadow: none; border-radius: 0; }
-      .actions { display: none; }
-      @page { size: A4 landscape; margin: 10mm; }
-      thead th { background: #eee !important; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin vận chuyển</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .xe-tab {
+            display: none;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .xe-tab.active {
+            display: block;
+        }
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 0;
+            padding-left: 0;
+            list-style: none;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab-button {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab-button.active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        .print-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        .print-btn:hover {
+            background-color: #45a049;
+        }
+        .print-all-btn {
+            background-color: #2196F3;
+        }
+        .print-all-btn:hover {
+            background-color: #0b7dda;
+        }
+        .xep-hang-table {
+            margin-left: 20px;
+            width: calc(100% - 20px);
+        }
+        .filter-container {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .filter-label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .filter-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .filter-button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .filter-button:hover {
+            background-color: #45a049;
+        }
+        .reset-button {
+            padding: 8px 15px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .reset-button:hover {
+            background-color: #d32f2f;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-section, .print-section * {
+                visibility: visible;
+            }
+            .print-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .tab-buttons, .print-btn, .filter-container {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="page">
-    <div class="card">
-      <div class="header">
-        <div class="title">PHIẾU THÔNG TIN XE <span class="subtle" id="title-id"></span></div>
-        <div class="actions">
-          <button type="button" onclick="window.print()">In</button>
-          <button type="button" onclick="downloadJSON()">Tải JSON</button>
+    <h1>Thông tin vận chuyển</h1>
+    
+    <div class="filter-container">
+        <div class="filter-group">
+            <label class="filter-label">Ngày xuất:</label>
+            <input type="date" id="filter-ngay-xuat" class="filter-input">
         </div>
-      </div>
-
-      <!-- THÔNG TIN BẢNG CHA -->
-      <div class="grid" id="parent-grid">
-        <!-- fill by JS -->
-      </div>
-
-      <!-- BẢNG PHỤ THUỘC -->
-      <div class="table-wrap" id="table-wrap">
-        <table id="detail-table" aria-label="Danh sách bill theo xe">
-          <thead>
-            <tr>
-              <th>STT</th>
-              <th>Bill</th>
-              <th>Khách hàng</th>
-              <th>Tên mặt hàng</th>
-              <th>Số kiện</th>
-              <th>Tỉnh trả</th>
-              <th>Xã trả</th>
-              <th>Nơi trả</th>
-              <th>Ngày xuất xe</th>
-              <th>Ghi chú</th>
-              <th>Ảnh Bill</th>
-            </tr>
-          </thead>
-          <tbody id="detail-tbody"></tbody>
-          <tfoot>
-            <tr>
-              <td colspan="4">Tổng</td>
-              <td id="total-kien">0</td>
-              <td colspan="6" id="total-bill" class="subtle"></td>
-            </tr>
-          </tfoot>
-        </table>
-        <div id="empty" class="empty" style="display:none">Chưa có dữ liệu chi tiết.</div>
-      </div>
+        
+        <div class="filter-group">
+            <label class="filter-label">Nhà cung cấp:</label>
+            <select id="filter-nha-cung-cap" class="filter-input">
+                <option value="">Tất cả</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label class="filter-label">Số bill:</label>
+            <input type="text" id="filter-so-bill" class="filter-input" placeholder="Nhập số bill">
+        </div>
+        
+        <button class="filter-button" onclick="applyFilters()">Lọc</button>
+        <button class="reset-button" onclick="resetFilters()">Reset</button>
     </div>
-  </div>
+    
+    <div id="controls">
+        <button class="print-all-btn print-btn" onclick="printAll()">In tất cả</button>
+    </div>
+    
+    <ul class="tab-buttons" id="xe-tabs"></ul>
+    <div id="xe-container"></div>
 
-  <noscript>Trang này cần JavaScript để đọc dữ liệu từ URL.</noscript>
+    <script>
+        // URL API
+        const apiUrl = "https://script.google.com/macros/s/AKfycbwbiLYAy1-FvBceJ0ir1XqJ9yzu-SEkhp6UT4uHTKGpGDNXIHMuhvkWca0Kz1HzLIqF/exec?all=1";
+        
+        // Biến lưu trữ dữ liệu
+        let xeData = [];
+        let filteredData = [];
+        
+        // Lấy dữ liệu từ API
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                xeData = data;
+                filteredData = data;
+                initNhaCungCapFilter(data.data["Nhà cung cấp"]);
+                displayXeData(data);
+            })
+            .catch(error => {
+                console.error("Lỗi khi lấy dữ liệu:", error);
+                document.getElementById("xe-container").innerHTML = "<p>Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</p>";
+            });
 
-  <script>
-    // ========= Helpers =========
-    const url = new URL(window.location.href);
-    const qp = url.searchParams;
-
-    const get = (k) => {
-      const v = qp.get(k);
-      if (v == null) return null;
-      try { return decodeURIComponent(v); } catch { return v; }
-    };
-
-    // Lấy tham số với nhiều tên alias (ưu tiên tên đầu)
-    const alias = (...keys) => {
-      for (const k of keys) {
-        const v = get(k);
-        if (v != null && v !== "") return v;
-      }
-      return "";
-    };
-
-    // Convert link Google Drive share -> link ảnh trực tiếp
-    function driveDirect(u) {
-      if (!u) return "";
-      const m1 = u.match(/\/d\/([^\/]+)\//);
-      const m2 = u.match(/[?&]id=([^&]+)/);
-      const id = m1?.[1] || m2?.[1];
-      return id ? `https://drive.google.com/uc?export=view&id=${id}` : u;
-    }
-
-    function parseDate(d) {
-      if (!d) return "";
-      // Nhận ISO, yyyy-mm-dd, dd/mm/yyyy...
-      const isNum = /^\d{4}-\d{2}-\d{2}/.test(d) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(d);
-      if (!isNum) return d;
-      try {
-        let dt;
-        if (d.includes("/")) {
-          const [dd, mm, yyyy] = d.split("/");
-          dt = new Date(+yyyy, +mm - 1, +dd);
-        } else {
-          dt = new Date(d);
+        // Khởi tạo bộ lọc nhà cung cấp
+        function initNhaCungCapFilter(nhaCungCapData) {
+            const filterSelect = document.getElementById("filter-nha-cung-cap");
+            
+            nhaCungCapData.forEach(ncc => {
+                const option = document.createElement("option");
+                option.value = ncc.ma_nha_cung_cap;
+                option.textContent = ncc.ten_nha_cung_cap;
+                filterSelect.appendChild(option);
+            });
         }
-        if (isNaN(dt)) return d;
-        const dd = String(dt.getDate()).padStart(2,"0");
-        const mm = String(dt.getMonth()+1).padStart(2,"0");
-        const yyyy = dt.getFullYear();
-        return `${dd}/${mm}/${yyyy}`;
-      } catch { return d; }
-    }
-
-    // Gộp rows1, rows2, ... nếu có (để vượt giới hạn URL); nếu không, dùng rows/items/data
-    function getRowsRawString() {
-      // Thu thập mọi khóa dạng rows, rows1..rowsN
-      const parts = [];
-      qp.forEach((v, k) => {
-        const m = k.match(/^rows(\d+)?$/i);
-        if (m) {
-          const idx = m[1] ? parseInt(m[1], 10) : 1; // rows -> 1
-          let dec = v;
-          try { dec = decodeURIComponent(v); } catch {}
-          parts[idx] = dec;
+        
+        // Áp dụng bộ lọc
+        function applyFilters() {
+            const ngayXuatFilter = document.getElementById("filter-ngay-xuat").value;
+            const nhaCungCapFilter = document.getElementById("filter-nha-cung-cap").value;
+            const soBillFilter = document.getElementById("filter-so-bill").value.toLowerCase();
+            
+            // Tạo bản sao của dữ liệu gốc để lọc
+            let filtered = JSON.parse(JSON.stringify(xeData));
+            
+            // Lọc theo ngày xuất
+            if (ngayXuatFilter) {
+                const filterDate = new Date(ngayXuatFilter).toLocaleDateString('en-GB');
+                filtered.data.Xe = filtered.data.Xe.filter(xe => {
+                    if (!xe.ngay) return false;
+                    const xeDate = new Date(xe.ngay.split('/').reverse().join('-')).toLocaleDateString('en-GB');
+                    return xeDate === filterDate;
+                });
+            }
+            
+            // Lọc theo nhà cung cấp
+            if (nhaCungCapFilter) {
+                filtered.data.Xe = filtered.data.Xe.filter(xe => xe.nha_cung_cap === nhaCungCapFilter);
+            }
+            
+            // Lọc theo số bill (trong bảng xếp hàng)
+            if (soBillFilter) {
+                const filteredXeIds = new Set();
+                
+                // Tìm các xe có bill trùng khớp
+                filtered.data["Xếp hàng"] = filtered.data["Xếp hàng"].filter(item => {
+                    if (item.bill && item.bill.toLowerCase().includes(soBillFilter)) {
+                        filteredXeIds.add(item.xe);
+                        return true;
+                    }
+                    return false;
+                });
+                
+                // Chỉ giữ lại các xe có trong filteredXeIds
+                if (filteredXeIds.size > 0) {
+                    filtered.data.Xe = filtered.data.Xe.filter(xe => filteredXeIds.has(xe.id));
+                } else {
+                    filtered.data.Xe = [];
+                }
+            }
+            
+            filteredData = filtered;
+            displayXeData(filtered);
         }
-      });
-      if (parts.length > 0) return parts.filter(Boolean).join("");
-
-      // Nếu không có dạng chia nhỏ, thử các khóa phổ biến
-      for (const key of ["rows","items","data"]) {
-        const v = get(key);
-        if (v) return v;
-      }
-      return "";
-    }
-
-    function tryJSON(str) {
-      try { return JSON.parse(str); } catch(e) {}
-      try { return JSON.parse(str.replace(/'/g,'"')); } catch(e) {}
-      return null;
-    }
-
-    function normalizeKey(k="") {
-      // Chuẩn hóa khóa: bỏ dấu, bỏ khoảng trắng, thường hóa
-      const mapVN = {
-        'à':'a','á':'a','ạ':'a','ả':'a','ã':'a','â':'a','ầ':'a','ấ':'a','ậ':'a','ẩ':'a','ẫ':'a','ă':'a','ằ':'a','ắ':'a','ặ':'a','ẳ':'a','ẵ':'a',
-        'è':'e','é':'e','ẹ':'e','ẻ':'e','ẽ':'e','ê':'e','ề':'e','ế':'e','ệ':'e','ể':'e','ễ':'e',
-        'ì':'i','í':'i','ị':'i','ỉ':'i','ĩ':'i',
-        'ò':'o','ó':'o','ọ':'o','ỏ':'o','õ':'o','ô':'o','ồ':'o','ố':'o','ộ':'o','ổ':'o','ỗ':'o','ơ':'o','ờ':'o','ớ':'o','ợ':'o','ở':'o','ỡ':'o',
-        'ù':'u','ú':'u','ụ':'u','ủ':'u','ũ':'u','ư':'u','ừ':'u','ứ':'u','ự':'u','ử':'u','ữ':'u',
-        'ỳ':'y','ý':'y','ỵ':'y','ỷ':'y','ỹ':'y','đ':'d'
-      };
-      const s = k.toLowerCase().split('').map(ch => mapVN[ch] ?? ch).join('');
-      return s.replace(/\s+|_/g,''); // bỏ spaces & _
-    }
-
-    function num(v) { const n = Number(String(v).replaceAll(',', '.')); return isNaN(n)?0:n; }
-
-    // ========= Lấy & hiển thị BẢNG CHA =========
-    const parent = {
-      id: alias('id','ID'),
-      ngay: parseDate(alias('ngay','Ngay')),
-      ngayDuKien: parseDate(alias('ngay_du_kien','ngaydukientoi','ngaydukien','Ngay du kien toi','NgayDuKienToi')),
-      trangThai: alias('trang_thai','trangthai','Trangthai'),
-      ncc: alias('ncc','nhacungcap','Nha cung cap','Nhacungcap'),
-      tenNcc: alias('ten_ncc','tennhacungcap','Tennhacungcap','Ten nha cung cap'),
-      ttThanhToan: alias('tt_thanh_toan','trangthaithanhtoan','Trang thai thanh toan'),
-      bks: alias('bks','bien_kiem_soat','bienkiemsoat','Bien kiem soat'),
-      laiXe: alias('lai_xe','laixe','Lai xe'),
-      sdt: alias('sdt','sdtlx','sdtlx','Sdt lai xe'),
-      ghiChu: alias('ghi_chu','ghichu')
-    };
-
-    const parentOrder = [
-      ['ID', 'id'],
-      ['Ngày', 'ngay'],
-      ['Ngày dự kiến tới', 'ngayDuKien'],
-      ['Trạng thái', 'trangThai'],
-      ['Nhà cung cấp', 'ncc'],
-      ['Tên nhà cung cấp', 'tenNcc'],
-      ['Trạng thái thanh toán', 'ttThanhToan'],
-      ['Biển kiểm soát', 'bks'],
-      ['Lái xe', 'laiXe'],
-      ['SĐT lái xe', 'sdt'],
-      ['Ghi chú', 'ghiChu']
-    ];
-
-    document.getElementById('title-id').textContent = parent.id ? `#${parent.id}` : '';
-
-    const parentGrid = document.getElementById('parent-grid');
-    parentOrder.forEach(([label, key]) => {
-      const div = document.createElement('div');
-      div.className = 'field';
-      div.innerHTML = `<div class="label">${label}</div><div class="value">${parent[key] || '<span class="subtle">—</span>'}</div>`;
-      parentGrid.appendChild(div);
-    });
-
-    // ========= Lấy & hiển thị BẢNG PHỤ THUỘC =========
-    const raw = getRowsRawString();
-    let rows = [];
-    const parsed = tryJSON(raw);
-    if (Array.isArray(parsed)) rows = parsed;
-
-    // Chuẩn hóa từng dòng (chấp nhận nhiều cách đặt tên khóa)
-    const norm = (r={}) => {
-      // build lookup by normalized key
-      const nk = {};
-      Object.keys(r).forEach(k => nk[normalizeKey(k)] = r[k]);
-
-      const val = (keys) => {
-        for (const k of keys) {
-          const v = nk[normalizeKey(k)];
-          if (v != null && v !== '') return v;
+        
+        // Reset bộ lọc
+        function resetFilters() {
+            document.getElementById("filter-ngay-xuat").value = "";
+            document.getElementById("filter-nha-cung-cap").value = "";
+            document.getElementById("filter-so-bill").value = "";
+            
+            filteredData = JSON.parse(JSON.stringify(xeData));
+            displayXeData(filteredData);
         }
-        return '';
-      };
-
-      return {
-        stt: val(['STT','stt','So thu tu']),
-        bill: val(['Bill']),
-        khachHang: val(['Khach hang','Khách hàng','kh']),
-        tenMatHang: val(['Ten mat hang','Tên mặt hàng','mat hang']),
-        soKien: num(val(['So kien','Số kiện','kien'])),
-        tinhTra: val(['Tinh tra','Tỉnh trả']),
-        xaTra: val(['Xa tra','Xã trả']),
-        noiTra: val(['Noi tra','Nơi trả']),
-        ngayXuatXe: parseDate(val(['Ngay xuat xe','Ngày xuất xe'])),
-        ghiChu: val(['Ghi chu','Ghi chú']),
-        anhBill: val(['Anh Bill','Ảnh Bill','Anh'])
-      };
-    };
-
-    const tbody = document.getElementById('detail-tbody');
-    const empty = document.getElementById('empty');
-
-    if (!rows.length) {
-      empty.style.display = 'block';
-    } else {
-      // Sắp xếp theo STT nếu có, nếu không giữ nguyên
-      rows = rows.map(norm).sort((a,b) => {
-        const na = Number(a.stt), nb = Number(b.stt);
-        if (!isNaN(na) && !isNaN(nb)) return na - nb;
-        return 0;
-      });
-
-      let totalKien = 0;
-      rows.forEach((r, i) => {
-        totalKien += num(r.soKien);
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${r.stt || i+1}</td>
-          <td><span class="badge">${r.bill || ''}</span></td>
-          <td>${r.khachHang || ''}</td>
-          <td>${r.tenMatHang || ''}</td>
-          <td>${r.soKien || 0}</td>
-          <td>${r.tinhTra || ''}</td>
-          <td>${r.xaTra || ''}</td>
-          <td>${r.noiTra || ''}</td>
-          <td>${r.ngayXuatXe || ''}</td>
-          <td>${r.ghiChu || ''}</td>
-          <td>${r.anhBill ? `<img class="thumb" src="${driveDirect(r.anhBill)}" alt="bill">` : ''}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById('total-kien').textContent = totalKien.toString();
-      document.getElementById('total-bill').textContent = `${rows.length} bill`;
-    }
-
-    // Tải lại JSON (để kiểm tra nhanh dữ liệu đã parse)
-    function downloadJSON() {
-      const data = {
-        parent,
-        rows
-      };
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `xe_${parent.id||'data'}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-    window.downloadJSON = downloadJSON;
-  </script>
+        
+        // Hiển thị dữ liệu xe và xếp hàng
+        function displayXeData(data) {
+            const xeContainer = document.getElementById("xe-container");
+            const xeTabs = document.getElementById("xe-tabs");
+            
+            // Kiểm tra xem có dữ liệu xe không
+            if (!data.data.Xe || data.data.Xe.length === 0) {
+                xeContainer.innerHTML = "<p>Không tìm thấy xe nào phù hợp với bộ lọc.</p>";
+                xeTabs.innerHTML = "";
+                return;
+            }
+            
+            // Xóa nội dung cũ
+            xeContainer.innerHTML = "";
+            xeTabs.innerHTML = "";
+            
+            // Duyệt qua từng xe
+            data.data.Xe.forEach((xe, index) => {
+                // Tạo tab button
+                const tabButton = document.createElement("li");
+                tabButton.className = `tab-button ${index === 0 ? 'active' : ''}`;
+                tabButton.textContent = `Xe ${xe.id || ''} - ${xe.bien_kiem_soat || ''}`;
+                tabButton.onclick = () => switchTab(index);
+                xeTabs.appendChild(tabButton);
+                
+                // Tạo div cho thông tin xe
+                const xeDiv = document.createElement("div");
+                xeDiv.className = `xe-tab print-section ${index === 0 ? 'active' : ''}`;
+                xeDiv.id = `xe-tab-${index}`;
+                
+                // Thêm nút in cho từng xe
+                const printButton = document.createElement("button");
+                printButton.className = "print-btn";
+                printButton.textContent = `In thông tin xe ${xe.id || ''}`;
+                printButton.onclick = () => printXe(index);
+                xeDiv.appendChild(printButton);
+                
+                // Thêm thông tin xe
+                const xeInfoTable = document.createElement("table");
+                xeInfoTable.innerHTML = `
+                    <tr>
+                        <th>ID</th>
+                        <th>Ngày xuất</th>
+                        <th>Ngày dự kiến đến</th>
+                        <th>Nhà cung cấp</th>
+                        <th>Biển kiểm soát</th>
+                        <th>Lái xe</th>
+                        <th>SĐT lái xe</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                    <tr>
+                        <td>${xe.id || ''}</td>
+                        <td>${xe.ngay || ''}</td>
+                        <td>${xe.ngay_du_kien_toi || ''}</td>
+                        <td>${xe.ten_nha_cung_cap || ''}</td>
+                        <td>${xe.bien_kiem_soat || ''}</td>
+                        <td>${xe.lai_xe || ''}</td>
+                        <td>${xe.st_lai_xe || ''}</td>
+                        <td>${xe.ghi_chu || ''}</td>
+                    </tr>
+                `;
+                xeDiv.appendChild(xeInfoTable);
+                
+                // Tìm các bản ghi xếp hàng tương ứng với xe này
+                const xepHangItems = data.data["Xếp hàng"].filter(item => item.xe === xe.id);
+                
+                if (xepHangItems.length > 0) {
+                    // Tạo bảng xếp hàng
+                    const xepHangTable = document.createElement("table");
+                    xepHangTable.className = "xep-hang-table";
+                    
+                    xepHangTable.innerHTML = `
+                        <tr>
+                            <th>STT</th>
+                            <th>Số Bill</th>
+                            <th>Khách hàng</th>
+                            <th>Tên mặt hàng</th>
+                            <th>Số kiện</th>
+                            <th>Tỉnh trả</th>
+                            <th>Ngày xuất xe</th>
+                            <th>Ghi chú</th>
+                        </tr>
+                    `;
+                    
+                    // Thêm các hàng dữ liệu xếp hàng
+                    xepHangItems.forEach(item => {
+                        // Tìm tên khách hàng từ bảng Khách hàng
+                        const khachHang = data.data["Khách hàng"].find(kh => kh.ma_khach_hang === item.khach_hang);
+                        const tenKhachHang = khachHang ? khachHang.ten_khach_hang : item.khach_hang;
+                        
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${item.stt || ''}</td>
+                            <td>${item.bill || ''}</td>
+                            <td>${tenKhachHang || ''}</td>
+                            <td>${item.ten_mat_hang || ''}</td>
+                            <td>${item.so_kien || ''}</td>
+                            <td>${item.tinh_tra || ''}</td>
+                            <td>${item.ngay_xuat_xe || ''}</td>
+                            <td>${item.ghi_chu || ''}</td>
+                        `;
+                        xepHangTable.appendChild(row);
+                    });
+                    
+                    xeDiv.appendChild(xepHangTable);
+                } else {
+                    const noData = document.createElement("p");
+                    noData.textContent = "Không có dữ liệu xếp hàng cho xe này.";
+                    xeDiv.appendChild(noData);
+                }
+                
+                xeContainer.appendChild(xeDiv);
+            });
+        }
+        
+        // Chuyển tab
+        function switchTab(index) {
+            // Ẩn tất cả các tab
+            document.querySelectorAll('.xe-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Hiển thị tab được chọn
+            document.getElementById(`xe-tab-${index}`).classList.add('active');
+            document.querySelectorAll('.tab-button')[index].classList.add('active');
+        }
+        
+        // In thông tin 1 xe
+        function printXe(index) {
+            const printContent = document.getElementById(`xe-tab-${index}`).innerHTML;
+            const originalContent = document.body.innerHTML;
+            
+            document.body.innerHTML = `
+                <div class="print-section">
+                    ${printContent}
+                    <p style="text-align: right; margin-top: 20px;">Ngày in: ${new Date().toLocaleDateString()}</p>
+                </div>
+            `;
+            
+            window.print();
+            document.body.innerHTML = originalContent;
+            // Sau khi in, khôi phục lại sự kiện click
+            document.querySelectorAll('.tab-button').forEach((btn, i) => {
+                btn.onclick = () => switchTab(i);
+            });
+            document.querySelectorAll('.print-btn').forEach((btn, i) => {
+                if (i === 0) {
+                    btn.onclick = () => printAll();
+                } else {
+                    btn.onclick = () => printXe(i-1);
+                }
+            });
+        }
+        
+        // In tất cả xe
+        function printAll() {
+            const printSections = document.querySelectorAll('.print-section');
+            let allContent = '';
+            
+            printSections.forEach(section => {
+                allContent += section.innerHTML + '<div style="page-break-after: always;"></div>';
+            });
+            
+            const originalContent = document.body.innerHTML;
+            
+            document.body.innerHTML = `
+                <div class="print-all">
+                    ${allContent}
+                    <p style="text-align: right; margin-top: 20px;">Ngày in: ${new Date().toLocaleDateString()}</p>
+                </div>
+            `;
+            
+            window.print();
+            document.body.innerHTML = originalContent;
+            // Sau khi in, khôi phục lại sự kiện click
+            document.querySelectorAll('.tab-button').forEach((btn, i) => {
+                btn.onclick = () => switchTab(i);
+            });
+            document.querySelectorAll('.print-btn').forEach((btn, i) => {
+                if (i === 0) {
+                    btn.onclick = () => printAll();
+                } else {
+                    btn.onclick = () => printXe(i-1);
+                }
+            });
+        }
+    </script>
 </body>
 </html>
