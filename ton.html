@@ -161,7 +161,6 @@
 
             // Tạo danh sách các tỉnh duy nhất kèm ưu tiên
             const uniqueProvinces = [...new Set(bills.map(b => b.tinh_nhan))]
-                .filter(province => province) // Loại bỏ các giá trị undefined/null
                 .map(province => ({
                     name: province,
                     priority: getPriority(province)
@@ -203,9 +202,7 @@
             document.getElementById('editBtn').style.display='inline-block';
             showStatus(`Tìm thấy ${bills.length} đơn hàng chưa xếp đủ`);
 
-            let currentProvince = null;
-
-            bills.forEach((b, index)=>{
+            bills.forEach((b)=>{
                 const billKien=parseInt(b.so_kien)||0;
                 const packed=sumPacked[b.so_bill]||0;
                 const diff=billKien-packed;
@@ -218,17 +215,7 @@
                 const tr=document.createElement('tr');
                 if(diff>0) tr.classList.add('warning');
 
-                // Thêm dòng phân cách khi tỉnh thay đổi
-                if (currentProvince !== b.tinh_nhan) {
-                    currentProvince = b.tinh_nhan;
-                    if (index > 0) {
-                        const separator = document.createElement('tr');
-                        separator.innerHTML = `<td colspan="14" style="background-color: #e9e9e9; font-weight: bold;">${currentProvince || 'Không xác định'}</td>`;
-                        tb.appendChild(separator);
-                    }
-                }
-
-                // Để trống cột STT như yêu cầu
+                // Để trống cột STT
                 tr.innerHTML = `
                     <td></td>
                     <td>${b.ngay_boc || ''}</td>
