@@ -31,7 +31,7 @@
             th, td { padding: 5px; }
         }
 
-        /* 🎯 Làm nổi bật cột Số Bill (bền vững theo class) */
+        /* Làm nổi bật cột Số Bill */
         #resultTable th.bill-col,
         #resultTable td.bill-col {
             background: #fff5e6;
@@ -39,7 +39,7 @@
             color: #c25700;
             border-left: 2px solid #f5b76b;
             border-right: 2px solid #f5b76b;
-            cursor: copy; /* gợi ý có thể copy */
+            cursor: copy;
         }
         @media print {
             #resultTable th.bill-col,
@@ -59,7 +59,7 @@
     <div class="no-print">
         <button id="exportBtn" class="button" style="display: none;">Xuất Excel</button>
         <button id="printBtn" class="button print" style="display: none;">In báo cáo</button>
-        <button id="editBtn" class="button edit" style="display: none;"></button>
+        <button id="editBtn" class="button edit" style="display: none;">Sửa dữ liệu</button>
     </div>
     <div id="status" class="loading">Đang tải dữ liệu...</div>
     <div class="container">
@@ -73,11 +73,11 @@
                     <th>Dịch vụ GTGT</th>
                     <th>Nội dung hàng</th>
                     <th>Chưa xếp</th>
-                    <th>Đơn vị</th><!-- mới -->
+                    <th>Đơn vị</th>
                     <th>COD</th>
                     <th>SĐT nhận</th>
                     <th>Địa chỉ nhận</th>
-                    <th class="bill-col">Số Bill</th> <!-- ✅ thêm class bền vững -->
+                    <th class="bill-col">Số Bill</th>
                     <th>Trọng lượng chưa xếp</th>
                     <th>Thể tích chưa xếp</th>
                 </tr>
@@ -159,13 +159,34 @@
                 return billKien > packed;
             });
 
-            // sắp theo ưu tiên tỉnh, 0 xuống sau, trong cùng ưu tiên: ngày mới trước
-            bills.sort((a,b)=>{
-                const pa=getPriority(a.tinh_nhan), pb=getPriority(b.tinh_nhan);
-                if(pa===0 && pb===0) return parseVnDate(b.ngay_boc)-parseVnDate(a.ngay_boc);
-                if(pa===0) return 1;
-                if(pb===0) return -1;
-                return pa!==pb ? pa-pb : parseVnDate(b.ngay_boc)-parseVnDate(a.ngay_boc);
+            // Tạo danh sách các tỉnh duy nhất kèm ưu tiên
+            const uniqueProvinces = [...new Set(bills.map(b => b.tinh_nhan))]
+                .filter(province => province) // Loại bỏ các giá trị undefined/null
+                .map(province => ({
+                    name: province,
+                    priority: getPriority(province)
+                }))
+                .sort((a, b) => {
+                    // Sắp xếp các tỉnh theo ưu tiên, cùng ưu tiên thì sắp theo tên
+                    if (a.priority === 0 && b.priority === 0) return a.name.localeCompare(b.name);
+                    if (a.priority === 0) return 1;
+                    if (b.priority === 0) return -1;
+                    return a.priority !== b.priority 
+                        ? a.priority - b.priority 
+                        : a.name.localeCompare(b.name);
+                });
+
+            // Sắp xếp bills: đầu tiên theo thứ tự tỉnh đã sắp xếp, sau đó theo ngày
+            bills.sort((a, b) => {
+                const provinceA = uniqueProvinces.findIndex(p => p.name === a.tinh_nhan);
+                const provinceB = uniqueProvinces.findIndex(p => p.name === b.tinh_nhan);
+                
+                if (provinceA !== provinceB) {
+                    return provinceA - provinceB;
+                }
+                
+                // Cùng tỉnh thì sắp theo ngày (mới trước)
+                return parseVnDate(b.ngay_boc) - parseVnDate(a.ngay_boc);
             });
 
             const tb=document.getElementById('billTable');
@@ -182,7 +203,9 @@
             document.getElementById('editBtn').style.display='inline-block';
             showStatus(`Tìm thấy ${bills.length} đơn hàng chưa xếp đủ`);
 
-            bills.forEach((b)=>{
+            let currentProvince = null;
+
+            bills.forEach((b, index)=>{
                 const billKien=parseInt(b.so_kien)||0;
                 const packed=sumPacked[b.so_bill]||0;
                 const diff=billKien-packed;
@@ -195,7 +218,17 @@
                 const tr=document.createElement('tr');
                 if(diff>0) tr.classList.add('warning');
 
-                // STT để trống + tách "Chưa xếp" thành 2 cột: số & đơn vị "kiện"
+                // Thêm dòng phân cách khi tỉnh thay đổi
+                if (currentProvince !== b.tinh_nhan) {
+                    currentProvince = b.tinh_nhan;
+                    if (index > 0) {
+                        const separator = document.createElement('tr');
+                        separator.innerHTML = `<td colspan="14" style="background-color: #e9e9e9; font-weight: bold;">${currentProvince || 'Không xác định'}</td>`;
+                        tb.appendChild(separator);
+                    }
+                }
+
+                // Để trống cột STT như yêu cầu
                 tr.innerHTML = `
                     <td></td>
                     <td>${b.ngay_boc || ''}</td>
@@ -208,12 +241,11 @@
                     <td>${b.cod || ''}</td>
                     <td>${b.st_khach_nhan || ''}</td>
                     <td>${b.ia_chi_nhan || ''}</td>
-                    <td class="bill-col" title="Click để copy">${b.so_bill}</td> <!-- ✅ ô Số Bill được gắn class -->
+                    <td class="bill-col" title="Click để copy">${b.so_bill}</td>
                     <td>${tlUn.toFixed(2)}</td>
                     <td>${ttUn.toFixed(2)}</td>
                 `;
 
-                // Nhấn vào hàng vẫn mở modal như cũ
                 tr.addEventListener('click',()=>openEditModal(b, packed, tlUn, ttUn));
                 tb.appendChild(tr);
             });
@@ -271,7 +303,6 @@
                 body{font-family:Arial;margin:15px;}table{border-collapse:collapse;width:100%;font-size:10px;}
                 th,td{border:1px solid #ddd;padding:4px;text-align:left;}th{background:#f2f2f2;}
                 .warning{background:#fff3cd!important;}@page{size:A4 landscape;margin:10mm;}
-                /* In vẫn nổi bật cột Số Bill */
                 #resultTable th.bill-col,#resultTable td.bill-col{
                     background:#ffffcc !important;
                     -webkit-print-color-adjust: exact;
@@ -283,12 +314,9 @@
             w.document.close();
         });
 
-        // Mở modal từ nút "Sửa dữ liệu" (giữ nguyên chỉ số cột)
         document.getElementById('editBtn').addEventListener('click',()=>{
             const r=document.querySelector('#billTable tr');
             if(r){
-                // STT(0) | Ngày(1) | Tỉnh(2) | KH(3) | DV(4) | Nội dung(5) | Chưa xếp(6) | Đơn vị(7)
-                // COD(8) | SĐT(9) | Đ/c(10) | Số Bill(11) | TL(12) | TT(13)
                 const id = r.cells[11].textContent;
                 const b = currentData.Bill.find(x=>x.so_bill===id);
                 if(b){
@@ -302,11 +330,10 @@
             }
         });
 
-        // 📋 Click vào Số Bill để copy (không mở modal)
         document.getElementById('billTable').addEventListener('click', (e)=>{
             const cell = e.target.closest('td.bill-col');
             if(!cell) return;
-            e.stopPropagation(); // chặn mở modal khi click ô Số Bill
+            e.stopPropagation();
             const text = cell.textContent.trim();
             if(!text) return;
             (navigator.clipboard && navigator.clipboard.writeText)
@@ -314,7 +341,7 @@
                     cell.title = 'Đã copy!';
                     setTimeout(()=>cell.title='', 800);
                 }).catch(()=>{})
-                : (function(){ /* fallback đơn giản */ 
+                : (function(){ 
                     const ta=document.createElement('textarea'); ta.value=text;
                     document.body.appendChild(ta); ta.select(); document.execCommand('copy');
                     document.body.removeChild(ta);
