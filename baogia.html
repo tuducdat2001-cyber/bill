@@ -1,1 +1,359 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Dự Án FATA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(to right, #2c3e50, #4ca1af);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .horizontal-timeline {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            margin: 40px 0;
+        }
+        
+        .timeline-progress {
+            height: 6px;
+            background: #e0e0e0;
+            position: relative;
+            border-radius: 3px;
+            margin: 0 50px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #4CAF50, #2196F3);
+            width: 20%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        
+        .timeline-items {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            position: relative;
+            /* Thêm vào để các item con có thể điều chỉnh chiều cao */
+            align-items: stretch; /* Đảm bảo các item con có chiều cao bằng nhau */
+        }
+        
+        .timeline-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 20%;
+            position: relative;
+            /* Thêm vào để timeline-content có thể điều chỉnh chiều cao */
+            flex: 1; /* Cho phép các item co giãn để lấp đầy không gian */
+        }
+        
+        .timeline-point {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #4ca1af;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 15px;
+            box-shadow: 0 0 0 5px rgba(76, 161, 175, 0.2);
+        }
+        
+        .timeline-point.current {
+            background: #2196F3;
+            animation: pulse 2s infinite;
+        }
+        
+        .timeline-point.completed {
+            background: #4CAF50;
+        }
+        
+        .timeline-content {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 90%;
+            text-align: center;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex; /* Sử dụng flexbox cho nội dung */
+            flex-direction: column; /* Xếp chồng các phần tử con */
+            justify-content: space-between; /* Đẩy các phần tử lên và xuống */
+            flex-grow: 1; /* Cho phép content phát triển để lấp đầy không gian còn lại trong timeline-item */
+        }
+        
+        .timeline-content:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .timeline-content::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid white;
+        }
+        
+        .date {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .timeline-content h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            /* Loại bỏ min-height cố định ở đây nếu muốn chiều cao linh hoạt hơn,
+               nhưng giữ lại để đảm bảo tiêu đề không quá ngắn */
+            min-height: 60px; 
+        }
+        
+        .description {
+            color: #555;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            flex-grow: 1; /* Cho phép phần mô tả mở rộng để lấp đầy không gian */
+            margin-bottom: 15px; /* Thêm khoảng cách dưới mô tả */
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: auto; /* Đẩy trạng thái xuống dưới cùng */
+            font-weight: bold;
+        }
+        
+        .completed {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .current {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .upcoming {
+            background-color: #FF9800;
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(33, 150, 243, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(33, 150, 243, 0);
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .timeline-items {
+                flex-wrap: wrap;
+                align-items: stretch; /* Đảm bảo các item vẫn có chiều cao bằng nhau khi xuống dòng */
+            }
+            
+            .timeline-item {
+                width: 50%;
+                margin-bottom: 30px;
+                /* Đảm bảo flex-grow được áp dụng để chúng lấp đầy chiều cao */
+                flex-grow: 1; 
+            }
+            
+            .timeline-progress {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .timeline-item {
+                width: 100%;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>TIMELINE DỰ ÁN ODER</h1>
+            <p>Tư vấn và thực hiện bởi UPCODE</p>
+        </div>
+        
+        <div class="horizontal-timeline">
+            <div class="timeline-progress">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+            
+            <div class="timeline-items">
+                <div class="timeline-item">
+                    <div class="timeline-point current"> 
+                        <i class="fas fa-tasks"></i> 
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">01/9</div>
+                        <h3>ODER1: Quản lý vận đơn</h3>
+                        <p class="description">Triển khai module quản lý vận đơn với đầy đủ tính năng theo dõi, cập nhật trạng thái và quản lý quy trình vận chuyển.</p>
+                        <span class="status current">ĐANG THỰC HIỆN</span> 
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-point"> 
+                        <i class="fas fa-chart-line"></i> 
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">09/9</div>
+                        <h3>ODER2: Quản lý kho</h3>
+                        <p class="description">Phát triển hệ thống quản lý kho hàng với tính năng kiểm soát tồn kho, nhập/xuất hàng và cảnh báo hàng hóa sắp hết.</p>
+                        <span class="status upcoming">SẮP TỚI</span> 
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-point">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">17/9</div>
+                        <h3>ODER3: Quản lý kinh phí marketing</h3>
+                        <p class="description">Xây dựng module quản lý ngân sách và chi phí marketing với tính năng phân bổ ngân sách, theo dõi chi tiêu và báo cáo hiệu quả.</p>
+                        <span class="status upcoming">SẮP TỚI</span>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-point">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">24/9</div>
+                        <h3>Báo cáo doanh thu, chi phí</h3>
+                        <p class="description">Phát triển hệ thống báo cáo tổng hợp với đa dạng biểu đồ và phân tích doanh thu, chi phí, lợi nhuận theo nhiều chiều dữ liệu.</p>
+                        <span class="status upcoming">SẮP TỚI</span>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-point">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">25/9</div>
+                        <h3>Bàn giao app & Phản hồi</h3>
+                        <p class="description">Bàn giao ứng dụng hoàn chỉnh cho khách hàng, tiếp nhận phản hồi và tiến hành chỉnh sửa để tối ưu hóa trải nghiệm người dùng.</p>
+                        <span class="status upcoming">SẮP TỚI</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Zalo: 0333095485 - FACEBOOK: Từ Đạt</p>
+        </div>
+    </div>
 
+    <script>
+        // Cập nhật thanh tiến trình
+        function updateProgress() {
+            const progressBar = document.getElementById('progress');
+            // Giả sử hôm nay là ngày 5/9
+            const today = new Date(2023, 8, 5); // Tháng bắt đầu từ 0 (0 = tháng 1)
+            const startDate = new Date(2023, 8, 1); // 1/9/2023
+            const endDate = new Date(2023, 8, 25); // 25/9/2023
+            
+            const totalDuration = endDate - startDate;
+            const elapsed = today - startDate;
+            
+            let percentage = (elapsed / totalDuration) * 100;
+            percentage = Math.min(Math.max(percentage, 0), 100); // Giới hạn trong khoảng 0-100
+            
+            progressBar.style.width = percentage + '%';
+        }
+        
+        // Khởi chạy khi trang được tải
+        window.onload = function() {
+            updateProgress();
+        };
+    </script>
+</body>
+</html>
