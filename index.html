@@ -532,65 +532,75 @@
 <script>
     // Hàm lấy giá trị từ URL Parameter
     function getParam(name) {
-        // Sửa lại để xử lý các ký tự đặc biệt trong query string
+        // Sử dụng URLSearchParams để xử lý các tham số URL một cách hiện đại và an toàn
         const urlParams = new URLSearchParams(window.location.search);
+        // Trả về giá trị của tham số hoặc chuỗi rỗng nếu không tìm thấy
         return urlParams.get(name) || '';
     }
 
     document.addEventListener('DOMContentLoaded', (event) => {
-        // Lấy mã đơn hàng từ URL hoặc dùng giá trị mặc định
+        // --- Phần lấy dữ liệu và cập nhật giao diện ---
+
+        // Mã đơn hàng: Lấy từ URL hoặc dùng giá trị mặc định nếu không có
         const orderNumber = getParam("maDonHang") || "ECO105327"; 
 
-        // Tạo mã vạch bằng JsBarcode với mã đơn hàng đã lấy
+        // Tạo mã vạch bằng JsBarcode
         JsBarcode("#barcode-svg", orderNumber, {
-            format: "CODE128",
-            displayValue: true,
-            fontSize: 18,
-            width: 2,
-            height: 50,
-            textAlign: "center" // Đảm bảo mã vạch được căn giữa nếu cần
+            format: "CODE128", // Định dạng mã vạch
+            displayValue: true, // Hiển thị giá trị dưới mã vạch
+            fontSize: 18, // Kích thước font chữ
+            width: 2,   // Độ rộng của các vạch
+            height: 50, // Chiều cao của mã vạch
+            textAlign: "center" // Căn giữa mã vạch
         });
 
-        // Cập nhật các trường dữ liệu khác dựa trên URL
+        // Cập nhật thông tin người gửi
         document.getElementById("tenNguoiGui").textContent = getParam("tenNguoiGui");
         document.getElementById("diaChiNguoiGui").textContent = getParam("diaChiNguoiGui");
         document.getElementById("xaPhuongGui").textContent = getParam("xaPhuongGui");
         document.getElementById("tinhTPGui").textContent = getParam("tinhTPGui");
         document.getElementById("sdtNguoiGui").textContent = getParam("sdtNguoiGui");
 
+        // Cập nhật thông tin người nhận
         document.getElementById("tenNguoiNhan").textContent = getParam("tenNguoiNhan");
         document.getElementById("diaChiNguoiNhan").textContent = getParam("diaChiNguoiNhan");
         document.getElementById("xaPhuongNhan").textContent = getParam("xaPhuongNhan");
         document.getElementById("tinhTPNhan").textContent = getParam("tinhTPNhan");
         document.getElementById("sdtNguoiNhan").textContent = getParam("sdtNguoiNhan");
+        
+        // Cập nhật ngày giờ gửi
         document.getElementById("ngayGioGui").textContent = getParam("ngayGioGui");
         
         // Cập nhật thông tin hàng hóa
         document.getElementById("soKien").textContent = getParam("soKien");
-        const tlThucValue = getParam("tlThuc");
-        document.getElementById("tlThuc").textContent = tlThucValue ? `${tlThucValue} kg` : '';
-        const thetichValue = getParam("thetich");
-        document.getElementById("thetich").textContent = thetichValue ? `${thetichValue} m³` : '';
-        document.getElementById("dichVuTrongBang").textContent = getParam("dichVu");
-        document.getElementById("ghiChu").textContent = getParam("ghiChu");
-        document.getElementById("noiDungHangHoa").textContent = getParam("noiDungHangHoa");
+        const tlThucValue = getParam("tlThuc"); // Lấy trọng lượng
+        document.getElementById("tlThuc").textContent = tlThucValue ? `${tlThucValue} kg` : ''; // Hiển thị kèm đơn vị kg
+        const thetichValue = getParam("thetich"); // Lấy thể tích
+        document.getElementById("thetich").textContent = thetichValue ? `${thetichValue} m³` : ''; // Hiển thị kèm đơn vị m³
+        document.getElementById("dichVuTrongBang").textContent = getParam("dichVu"); // Dịch vụ trong bảng
+        document.getElementById("ghiChu").textContent = getParam("ghiChu"); // Ghi chú
+        document.getElementById("noiDungHangHoa").textContent = getParam("noiDungHangHoa"); // Nội dung hàng hóa
 
         // Cập nhật thông tin cước phí và định dạng lại
-        document.getElementById("thanhToan").textContent = getParam("thanhToan");
-        document.getElementById("cuocChinh").textContent = formatCurrency(getParam("cuocChinh"));
-        document.getElementById("dichVuThem").textContent = formatCurrency(getParam("dichVuThem"));
-        document.getElementById("tongCuoc").textContent = formatCurrency(getParam("tongCuoc"));
-        document.getElementById("thuHo").textContent = formatCurrency(getParam("thuHo"));
-        document.getElementById("tongPhaiThu").textContent = formatCurrency(getParam("tongPhaiThu"));
+        document.getElementById("thanhToan").textContent = getParam("thanhToan"); // Hình thức thanh toán
+        document.getElementById("cuocChinh").textContent = formatCurrency(getParam("cuocChinh")); // Cước chính, định dạng tiền tệ
+        document.getElementById("dichVuThem").textContent = formatCurrency(getParam("dichVuThem")); // Dịch vụ thêm, định dạng tiền tệ
+        document.getElementById("tongCuoc").textContent = formatCurrency(getParam("tongCuoc")); // Tổng cước, định dạng tiền tệ
+        document.getElementById("thuHo").textContent = formatCurrency(getParam("thuHo")); // Tiền thu hộ, định dạng tiền tệ
+        document.getElementById("tongPhaiThu").textContent = formatCurrency(getParam("tongPhaiThu")); // Tổng phải thu, định dạng tiền tệ
         
-        // 🚀 Gọi in ngay khi tải xong dữ liệu (bỏ comment nếu muốn tự động in)
-        // window.print(); 
+        // 🚀 Tự động gọi lệnh in khi trang đã tải xong và dữ liệu đã được điền
+        // Bỏ comment dòng dưới nếu bạn muốn hóa đơn tự động bật hộp thoại in khi mở.
+        window.print(); 
     });
 
-    // Hàm định dạng tiền tệ (thêm dấu phẩy)
+    // Hàm định dạng tiền tệ (thêm dấu phẩy ngăn cách hàng nghìn và sử dụng định dạng tiếng Việt)
     function formatCurrency(amount) {
+        // Loại bỏ tất cả các ký tự không phải số
         const cleanedAmount = String(amount).replace(/\D/g, '');
+        // Nếu chuỗi sau khi làm sạch rỗng, trả về '0'
         if (!cleanedAmount) return '0';
+        // Chuyển đổi thành số nguyên và định dạng theo chuẩn VNĐ
         return parseInt(cleanedAmount, 10).toLocaleString('vi-VN');
     }
 </script>
