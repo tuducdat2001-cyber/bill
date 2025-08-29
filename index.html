@@ -305,21 +305,27 @@
 
         /* --- THAY THẾ TOÀN BỘ KHỐI IN --- */
         @media print {
-            /* Khổ giấy A5 ngang, lề mỏng để tăng vùng in */
+            /* Khổ giấy A4 dọc, lề mỏng để tăng vùng in */
             @page {
-                size: A5 landscape;
+                size: A4 portrait; /* Thay đổi khổ giấy và hướng */
                 margin: 5mm;
             }
 
             /* Cố định kích thước trang để trình duyệt canh đúng */
             html, body {
-                width: 215mm;
-                height: 145mm;
+                width: 210mm; /* Chiều rộng của A4 */
+                height: 297mm; /* Chiều cao của A4 */
                 margin: 0 !important;
                 padding: 0 !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
                 background: #fff !important;
+
+                /* --- THÊM CÁC THUỘC TÍNH NÀY --- */
+                display: flex; /* Sử dụng Flexbox cho body */
+                justify-content: center; /* Căn giữa theo chiều ngang */
+                align-items: flex-start; /* Căn dọc về đầu trang (top) */
+                /* --- KẾT THÚC PHẦN THÊM --- */
             }
 
             /* Tắt bóng/viền thừa, đặt bề rộng theo vùng in */
@@ -330,12 +336,13 @@
                 max-width: 200mm;
                 padding: 5px;            /* giữ padding nhỏ để không tràn */
                 font-size: 1.0em;        /* in gọn hơn 1 chút so với màn hình */
-            }
+                /* Thêm chiều cao để chiếm nửa trang, bạn có thể cần điều chỉnh */
+                height: 140mm; /* Khoảng một nửa chiều cao A4, có thể cần tinh chỉnh */
+                overflow: hidden; /* Đảm bảo nội dung không tràn nếu vượt quá */
 
-            /* Thu nhỏ nhẹ để chắc chắn không tràn (chỉnh 0.90–0.95 nếu cần) */
-            .scale-print {
-                transform: scale(1);
-                transform-origin: top left;
+                /* --- THÊM CÁC THUỘC TÍNH NÀY ĐỂ ĐẢM BẢO KHÔNG BỊ LỖI CĂN CHỈNH KHI IN --- */
+                margin-top: 0 !important; /* Loại bỏ margin-top nếu có từ các định nghĩa khác */
+                /* --- KẾT THÚC PHẦN THÊM --- */
             }
 
             /* Chặn ngắt trang giữa các khối chính */
@@ -525,20 +532,23 @@
 <script>
     // Hàm lấy giá trị từ URL Parameter
     function getParam(name) {
-        return new URLSearchParams(window.location.search).get(name) || '';
+        // Sửa lại để xử lý các ký tự đặc biệt trong query string
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name) || '';
     }
 
     document.addEventListener('DOMContentLoaded', (event) => {
-        // Lấy mã vận đơn từ URL hoặc dùng giá trị mặc định
-        const orderNumber = getParam("maVanDon") || "ECO105327";
+        // Lấy mã đơn hàng từ URL hoặc dùng giá trị mặc định
+        const orderNumber = getParam("maDonHang") || "ECO105327"; 
 
-        // Tạo mã vạch bằng JsBarcode với mã vận đơn đã lấy
+        // Tạo mã vạch bằng JsBarcode với mã đơn hàng đã lấy
         JsBarcode("#barcode-svg", orderNumber, {
             format: "CODE128",
             displayValue: true,
             fontSize: 18,
             width: 2,
             height: 50,
+            textAlign: "center" // Đảm bảo mã vạch được căn giữa nếu cần
         });
 
         // Cập nhật các trường dữ liệu khác dựa trên URL
@@ -572,8 +582,9 @@
         document.getElementById("tongCuoc").textContent = formatCurrency(getParam("tongCuoc"));
         document.getElementById("thuHo").textContent = formatCurrency(getParam("thuHo"));
         document.getElementById("tongPhaiThu").textContent = formatCurrency(getParam("tongPhaiThu"));
-        // 🚀 Gọi in ngay khi tải xong dữ liệu
-        window.print();
+        
+        // 🚀 Gọi in ngay khi tải xong dữ liệu (bỏ comment nếu muốn tự động in)
+        // window.print(); 
     });
 
     // Hàm định dạng tiền tệ (thêm dấu phẩy)
